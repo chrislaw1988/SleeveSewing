@@ -1,0 +1,148 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// pmc_11_SewRightTAG.pmc
+;// Created on: 08/22/2014  Author: Josh Kelley
+;// 
+;// Handles Sewing Using the Right Sew Head with a Reverse Looper Installed
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+;#include "..\Headers\DownloadUMAC.h"
+
+OPEN PROG_14_SEW_RIGHT_REV_LOOPER  CLEAR
+
+
+	;//Loop out 360 deg with the Looper motor, We need to do this  
+	;//Because we leave the looper engaged for the last stitch for deploying the deployment line
+
+	INC;
+	pvt(250)
+	C 360.0 :3.723;
+	dwell(1);
+
+
+	;//Calculate the X axis move to position
+	;//When Sewing Tag Style Sleeves (dual deployment lines, deploy from middle out) We sew the Left side of the Sleeve
+	;//First. We only index to stitchcnt -1, as the HMI adds one stitch to allow tensioning of the last stitch
+
+	pXAxisMoveToPosition = ((pRHeadStitchCnt - 1) * pRHeadStitchLength_mm) + pMiddleGap_mm
+	pXAxisMoveToPosition = pXAxisMoveToPosition - (NEEDLE_OFFSET_MM + pLHeadStitchLength_mm)
+	
+	;//Index the X axis to the Start of the Sewing Segment
+	LINEAR;
+	INC
+	FRAX(X);
+	TA(200);
+	TS(75);
+	X(pXAxisMoveToPosition) F(pXAxisFeedRate_mm_Sec *60_SEC);
+	dwell(10);
+
+	;//Index and Start the Sewing Operation
+	;//We run the Looper in The opposite Direction to accomodate the Reverse Looper
+	INC;
+	TM(250);
+	B(30)C(-30);
+
+
+	;//Do The SlowStitches
+	pStitchIdx = 0;
+	dac3RhtThreadBrakeTension_cnts == pRHeadSlowStitchTension;
+	while(pStitchIdx < pRHeadSlowStitchCount and pStitchIdx < pRHeadStitchCnt)
+
+		if(pRHeadUseAltStartTension = TRUE or pRHeadSewLowStitchDensity = TRUE)
+
+			;/////////////////////TAGMOD
+			PVT(pRHeadSlowStitchTimeSlice);
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X 0.00:0.00 B 67.69:3.723 C -67.69:3.723;
+			dac3RhtThreadBrakeTension_cnts == pRHeadSlowStitchTension;
+			X (-pRHeadStitchLength_mm):(pRHeadStitchLength_mm / 30.0) B 0.00:0 C0.0:0;
+			dac3RhtThreadBrakeTension_cnts == pRHeadFiberTension_cnts;
+
+		else
+
+			;/////////////////////TAGMOD
+			PVT(pRHeadSlowStitchTimeSlice);
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X (-pRHeadStitchLength_mm):(pRHeadStitchLength_mm / 30.0) B 67.69:3.723 C -67.69:3.723;
+		
+		endif
+		
+		pStitchIdx = pStitchIdx + 1;
+	endwhile
+
+	;//Release the Right Thread Clamp
+	oRightThreadClamp == 0;
+
+
+	;//Calculate the Ramp Rate (Make Sure our Time Slice Is Faster than Our Slow Stitch Time Slice
+	if( (pRHeadSlowStitchTimeSlice - pRHeadStitchTimeSlice) > 0)
+		pStitchRampRate = ((pRHeadSlowStitchTimeSlice - pRHeadStitchTimeSlice) / pRHeadSlowStitchRampCount);
+	else
+		pStitchRampRate = 0.0;
+	endif
+
+
+	;//Sew The Remaining amout Of Stitches
+	pRampStitchIdx = 0;
+	while(pStitchIdx < pRHeadStitchCnt)
+		
+		if(pRampStitchIdx < pRHeadSlowStitchRampCount)
+			PVT((pRHeadSlowStitchTimeSlice - ((pRampStitchIdx + 1) * pStitchRampRate)))
+			pRampStitchIdx = pRampStitchIdx + 1;
+		else
+			PVT(pRHeadStitchTimeSlice)
+		endif
+
+		if(pRHeadUseAltStartTension = TRUE and pRampStitchIdx < pRHeadSlowStitchRampCount or pRHeadSewLowStitchDensity = TRUE)
+
+			;/////////////////////TAGMOD
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X 0.00:0.00 B 67.69:3.723 C -67.69:3.723;
+			dac3RhtThreadBrakeTension_cnts == pRHeadSlowStitchTension;
+			X (-pRHeadStitchLength_mm):(pRHeadStitchLength_mm / 30.0) B 0.00:0 C0.0:0;
+			dac3RhtThreadBrakeTension_cnts == pRHeadFiberTension_cnts;
+
+		else
+
+			if(pRampStitchIdx < pRHeadSlowStitchRampCount)
+			
+				dac3RhtThreadBrakeTension_cnts == pRHeadSlowStitchTension;
+			else
+				dac3RhtThreadBrakeTension_cnts == pRHeadFiberTension_cnts;
+			endif
+
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X 0.00:0.00 B 146.155:4.151667 C -146.155:4.151667;
+			X (-pRHeadStitchLength_mm):(pRHeadStitchLength_mm / 30.0) B 67.69:3.723 C -67.69:3.723;
+
+		endif
+	
+		pStitchIdx = pStitchIdx + 1;
+
+	endwhile
+
+	dwell(0);
+	;//Kill the Thread Brake Tension
+	dac3RhtThreadBrakeTension_cnts = 0;
+	dwell(20);
+
+	
+	;//Reset the Needle Looper Orientation
+	INC;
+	TM(250);
+	B(-30)C(30);
+
+
+	;//Set the Done Bit 
+	mMachineStatus0 = mMachineStatus0 | SEW_RIGHT_HEAD_DONE;
+
+
+CLOSE

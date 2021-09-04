@@ -1,0 +1,133 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Collections.ObjectModel;
+using System.Xml.Linq;
+using System.Diagnostics;
+using System.Xml.Serialization;
+using System.Runtime.CompilerServices;
+
+using Gore.Generic;
+using Gore.RecipeManager;
+using Gore.DeltaTau;
+
+namespace SleeveSewing
+{
+    public class Recipe : RecipeBase
+    {
+        bool? _EnableBarcode = null;
+        string _Barcode = null;
+        string _NeedlePlate = null;
+        string _LeftDeploymentLineFiberType = null;
+        string _RightDeploymentLineFiberType = null;
+
+        public Recipe()
+        {
+        }
+
+        public string NeedlePlate { get { return _NeedlePlate; } set { SetProperty(ref _NeedlePlate, value, nameof(NeedlePlate)); } }
+        public string LeftDeploymentLineFiberType { get { return _LeftDeploymentLineFiberType; } set { SetProperty(ref _LeftDeploymentLineFiberType, value, nameof(LeftDeploymentLineFiberType)); } }
+        public string RightDeploymentLineFiberType { get { return _RightDeploymentLineFiberType; } set { SetProperty(ref _RightDeploymentLineFiberType, value, nameof(RightDeploymentLineFiberType)); } }
+
+        
+        public bool? EnableBarcode
+        {
+            get { return _EnableBarcode; }
+            set { SetProperty(ref _EnableBarcode, value, nameof(EnableBarcode)); }
+        }
+
+        public string Barcode
+        {
+            get { return _Barcode; }
+            set { SetProperty(ref _Barcode, value, nameof(Barcode)); }
+        }
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Static Members 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Static Members
+
+        private static object _lock = new object();
+        private static Recipe _recipeManager;
+
+        #endregion ~Static Members
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Instance Members 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Instance Members
+
+        private Sleeve _currentRecipe = null;
+
+        private SortedDictionary<string, Sleeve> _productionRecipes = new SortedDictionary<string, Sleeve>();
+
+        #endregion ~Instance Members
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Properties 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Properties
+
+        public static Recipe Instance
+        {
+            get
+            {
+
+                lock (_lock)
+                {
+                    if (_recipeManager == null)
+                    {
+                        _recipeManager = new Recipe();
+                    }
+                    return (_recipeManager);
+                }
+            }
+        }
+
+        public Sleeve CurrentRecipe
+        {
+            get
+            {
+                return _currentRecipe;
+            }
+
+            set
+            {
+                _currentRecipe = value;
+            }
+        }
+
+        #endregion ~Properties
+
+
+
+
+        /////////////////////////////////////////////////////////////////////
+        // Validate
+        /////////////////////////////////////////////////////////////////////
+        override public void Validate()
+        {
+            RangeCheck RangeCheck = new RangeCheck("Recipe Data Error.");
+
+            // Barcode.
+            RangeCheck.NullableBoolHasValue_E(EnableBarcode, nameof(EnableBarcode));
+            if(EnableBarcode.Value)
+            {
+                RangeCheck.NullOrEmpty_E(Barcode, nameof(Barcode));
+            }
+
+        }
+
+
+        /////////////////////////////////////////////////////////////////////
+        // MakeCycleEnabled
+        /////////////////////////////////////////////////////////////////////
+        public void MakeCycleEnabled()
+        {
+        }
+    }
+
+
+}

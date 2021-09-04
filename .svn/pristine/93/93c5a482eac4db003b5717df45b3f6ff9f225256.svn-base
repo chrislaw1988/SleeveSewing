@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace SleeveSewing
+{
+    class StateRemoveDevice : SewingStateBase
+    {
+       
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Construction
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Construction
+        public StateRemoveDevice(SewingProcess sewProcess, string stateDescription)
+            :base(sewProcess, stateDescription)
+        {
+           
+        }
+
+        #endregion ~Construction
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          SewStateBase Overrides
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region StateBase Overrides
+
+        public override void ExecuteState()
+        {
+            MotionController.Instance.ClearIOForDeviceLoad();
+
+
+            if (SewingProcess.IsErrored == true)
+            {
+                SewingProcess.IsErrored = false;
+                return;
+            }
+
+            SewProcess.State = SewProcess.ReturnToStartState;
+            SewProcess.ExecuteState();
+        }
+
+        public override void SetMotionEvent(bool success)
+        {
+           
+        }
+
+        #endregion ~StateBase Overrides
+
+    }
+}

@@ -1,0 +1,140 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// pmc_1_Home.pmc
+;// Created on: 01/10/2012  Author: Josh Kelley
+;// 
+;// Controls Homing of the system
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+;#include "..\Headers\Download.h"
+
+OPEN PROG_1_HOME CLEAR
+
+	mAxis1HomeDone = FALSE;
+	mAxis2HomeDone = FALSE;
+	mAxis3HomeDone = FALSE;
+	mAxis4HomeDone = FALSE;
+
+	;//Make sure the Needle Block is locked into place
+	oNeedleBlock = 0;
+	dwell(1);
+
+	;//Left Needle
+	iAxis1FollowError = pLNeedleHomeFFE
+	iAxis1HomeVel = 1;
+	iAxis1HomeOffset = pLNeedleHomeOffset;
+	iAxis1HomeCapture = 1;	//Capture on Index Pulse High
+	iAxis1HomeFlag = 0;	//Configured to use the Home Switch
+
+	;//Right Needle
+	iAxis2FollowError = pRNeedleHomeFFE
+	iAxis2HomeVel = 1;
+	iAxis2HomeOffset = pRNeedleHomeOffset;
+	iAxis2HomeCapture = 1;	//Capture on Index Pulse High
+	iAxis2HomeFlag = 0;	//Configured to use the Home Switch
+
+	;//Looper
+	iAxis3FollowError = pLooperHomeFFE
+	iAxis3HomeVel = 1;
+	iAxis3HomeOffset = pLooperHomeOffset;
+	iAxis3HomeCapture = 1;	//Capture on Index Pulse High
+	iAxis3HomeFlag = 0;	//Configured to use the Home Switch
+
+	;//Traverse
+	iAxis4FollowError = pXAxisHomeFFE
+	iAxis4ConfigWord = $20001;	//Disable the Position Limits to Home As we want to Home to the Neg Limit
+	iAxis4HomeVel = -12.0;
+	iAxis4HomeOffset = pTraverseHomeOffset; //
+	iAxis4HomeCapture = 2;	//Capture On Flag Low Value
+	iAxis4HomeFlag = 2;	//The Flag will be the Negative End Limit (MLimN) 
+
+	;//iAxis4HomeCapture = 10;	//Capture On Flag High Value
+	;//iAxis4HomeFlag = 0;	//The Flag will be Home Limit 
+	iAxis4NegLimit = 0; //disable the Software Negative limit
+	iAxis4PosLimit = 0; //disable the Software Positive limit for homing
+
+	;//Home the Loopers and the Traverse motor
+	home3,4;
+
+	;//Set the Runtime FFE for the Looper and the Traverse X-Axis
+	iAxis3FollowError = pLooperFFE
+	iAxis4FollowError = pXAxisFFE
+
+	;//Now move the Loopers to A Safe position to ensure the Needles do not hit the looper during home 150deg
+	INC
+	TS(20)
+	TM(1000)
+	C(150)
+
+	;//Check if the Reverse Looper is Installed on this Machine 
+	if(pReverseLooperInstalled = TRUE)
+
+		;//Home The Left Needle
+		home1
+		dwell(1)
+
+		;//Move the Looper to a Safe Position For The Right Needle
+		TS(20)
+		TM(1500)
+		C(-300)
+		dwell(1)
+
+		;//Home the Right Needle
+		home2
+		dwell(1)
+	else
+
+		;//Home the Needles
+		home1,2;
+		dwell(1000);
+
+	endif
+
+	;//Set the Needle Runtime FFE
+	iAxis1FollowError = pLNeedleFFE
+	iAxis2FollowError = pRNeedleFFE
+
+
+	;//Now Move the Loopers back to Home Position
+	ABS(C)
+	TS(20)
+	TM(300)
+	C(0)
+
+	;//Re-Enable the Position Limits on Axis 4 and the Amp Fault Polarity Bit (23)
+	iAxis4ConfigWord=$1
+
+	if(mAxis1HomeDone = FALSE or mAxis2HomeDone = FALSE or mAxis3HomeDone = FALSE or mAxis4HomeDone = FALSE)
+
+		;//Check for the Left And Right Needle Home Failure
+		if(mAxis1HomeDone = FALSE)
+			pUmacError = AXIS1_HOME_FAILED
+		endif
+		if(mAxis2HomeDone = FALSE)
+			pUmacError = AXIS2_HOME_FAILED
+		endif
+
+		;//Check for the Looper Home Failure
+		if(mAxis3HomeDone = FALSE)
+			pUmacError = AXIS3_HOME_FAILED
+		endif
+
+		;//Check the Traverse (pitch) Home Failure
+		if(mAxis4HomeDone = FALSE)
+			pUmacError = AXIS4_HOME_FAILED
+		endif
+
+	else
+
+		mMachineStatus0 = mMachineStatus0 | HOME_DONE;
+
+	endif
+
+
+
+CLOSE

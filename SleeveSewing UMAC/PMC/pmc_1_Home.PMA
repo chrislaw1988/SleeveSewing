@@ -1,0 +1,80 @@
+; Created by PMAC Win32 Driver from:C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+;
+;C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+CLOSE;12
+DELETE GATHER;13
+OPEN PROG_1_HOME CLEAR;16
+mAxis1HomeDone = FALSE;18
+mAxis2HomeDone = FALSE;19
+mAxis3HomeDone = FALSE;20
+mAxis4HomeDone = FALSE;21
+oNeedleBlock = 0;24
+dwell(1);25
+iAxis1FollowError = pLNeedleHomeFFE;28
+iAxis1HomeVel = 1;29
+iAxis1HomeOffset = pLNeedleHomeOffset;30
+iAxis1HomeCapture = 1;31
+iAxis1HomeFlag = 0;32
+iAxis2FollowError = pRNeedleHomeFFE;35
+iAxis2HomeVel = 1;36
+iAxis2HomeOffset = pRNeedleHomeOffset;37
+iAxis2HomeCapture = 1;38
+iAxis2HomeFlag = 0;39
+iAxis3FollowError = pLooperHomeFFE;42
+iAxis3HomeVel = 1;43
+iAxis3HomeOffset = pLooperHomeOffset;44
+iAxis3HomeCapture = 1;45
+iAxis3HomeFlag = 0;46
+iAxis4FollowError = pXAxisHomeFFE;49
+iAxis4ConfigWord = $20001;50
+iAxis4HomeVel = -12.0;51
+iAxis4HomeOffset = pTraverseHomeOffset;52
+iAxis4HomeCapture = 2;53
+iAxis4HomeFlag = 2;54
+iAxis4NegLimit = 0;58
+iAxis4PosLimit = 0;59
+home3,4;62
+iAxis3FollowError = pLooperFFE;65
+iAxis4FollowError = pXAxisFFE;66
+INC;69
+TS(20);70
+TM(1000);71
+C(150);72
+if(pReverseLooperInstalled = TRUE);75
+home1;78
+dwell(1);79
+TS(20);82
+TM(1500);83
+C(-300);84
+dwell(1);85
+home2;88
+dwell(1);89
+else;90
+home1,2;93
+dwell(1000);94
+endif;96
+iAxis1FollowError = pLNeedleFFE;99
+iAxis2FollowError = pRNeedleFFE;100
+ABS(C);104
+TS(20);105
+TM(300);106
+C(0);107
+iAxis4ConfigWord=$1;110
+if(mAxis1HomeDone = FALSE or mAxis2HomeDone = FALSE or mAxis3HomeDone = FALSE or mAxis4HomeDone = FALSE);112
+if(mAxis1HomeDone = FALSE);115
+pUmacError = AXIS1_HOME_FAILED;116
+endif;117
+if(mAxis2HomeDone = FALSE);118
+pUmacError = AXIS2_HOME_FAILED;119
+endif;120
+if(mAxis3HomeDone = FALSE);123
+pUmacError = AXIS3_HOME_FAILED;124
+endif;125
+if(mAxis4HomeDone = FALSE);128
+pUmacError = AXIS4_HOME_FAILED;129
+endif;130
+else;132
+mMachineStatus0 = mMachineStatus0 | HOME_DONE;134
+endif;136
+CLOSE;140
+CLOSE

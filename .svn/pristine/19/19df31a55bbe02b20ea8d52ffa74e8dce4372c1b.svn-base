@@ -1,0 +1,122 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// plc_3_Init.plc
+;// Created : 01/10/2013  Author: Josh Kelley
+;//
+;//	 Initializes Motors, Control and Status Words, and IO Places Machine in Ready to Run State
+;//	 This will be performed when errors occur, or startup	
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+CLOSE
+DELETE GATHER
+OPEN PLC_3_INIT CLEAR
+
+
+
+
+	;/////////////////////////////////////////////////////////////
+	;//		Axis 1 Phasing
+	;///////////////////////////////////////////////////////////////
+
+	;//Clear the Phasing Fault Bit and Send the Phasing Command
+	mAxis1PhasingFault = 0;
+	command "#1$";
+
+	;//Wait for the Phasing to Start
+	while(mAxis1Phasing = FALSE AND mAxis1AmpEnable = FALSE)
+	endwhile
+
+	;//Check for the Phasing To Complete or Error
+	while(mAxis1Phasing = TRUE OR mAxis1InPosition = FALSE)
+
+		if(mAxis1PhasingFault = TRUE)
+			pUmacError = AXIS1_PHASING_FAULT
+			disable PLC8
+		endif
+	endwhile
+
+	;//Now Close the Loop on the Motor
+	command "$1j/";
+
+
+	;/////////////////////////////////////////////////////////////
+	;//		Axis 2 Phasing
+	;///////////////////////////////////////////////////////////////
+
+	;//Clear the Phasing Fault Bit and Send the Phasing Command
+	mAxis2PhasingFault = 0;
+	command "#2$";
+
+	;//Wait for the Phasing to Start
+	while(mAxis2Phasing = FALSE AND mAxis2AmpEnable = FALSE)
+	endwhile
+
+	;//Check for the Phasing To Complete or Error
+	while(mAxis2Phasing = TRUE OR mAxis2InPosition = FALSE)
+
+		if(mAxis2PhasingFault = TRUE)
+			pUmacError = AXIS2_PHASING_FAULT
+			disable PLC8
+		endif
+	endwhile
+
+	;//Now Close the Loop on the Motor
+	command "$2j/";
+
+
+	;/////////////////////////////////////////////////////////////
+	;//		Axis 3 Phasing
+	;///////////////////////////////////////////////////////////////
+
+	;//Clear the Phasing Fault Bit and Send the Phasing Command
+	mAxis3PhasingFault = 0;
+	command "#3$";
+
+	;//Wait for the Phasing to Start
+	while(mAxis3Phasing = FALSE AND mAxis3AmpEnable = FALSE)
+	endwhile
+
+	;//Check for the Phasing To Complete or Error
+	while(mAxis3Phasing = TRUE OR mAxis3InPosition = FALSE)
+
+		if(mAxis3PhasingFault = TRUE)
+			pUmacError = AXIS3_PHASING_FAULT
+			disable PLC8
+		endif
+	endwhile
+
+	;//Now Close the Loop on the Motor
+	command "$3j/";
+
+
+	;/////////////////////////////////////////////////////////////
+	;//		Axis 4 Phasing
+	;///////////////////////////////////////////////////////////////
+
+	;//Clear the Phasing Fault Bit and Send the Phasing Command
+	mAxis4PhasingFault = 0;
+	command "#4$";
+
+	;//Wait for the Phasing to Start
+	while(mAxis4Phasing = FALSE AND mAxis4AmpEnable = FALSE)
+	endwhile
+
+	;//Check for the Phasing To Complete or Error
+	while(mAxis4Phasing = TRUE OR mAxis4InPosition = FALSE)
+
+		if(mAxis4PhasingFault = TRUE)
+			pUmacError = AXIS4_PHASING_FAULT
+		endif
+	endwhile
+
+	;//Now Close the Loop on the Motor
+	command "$4j/";
+
+	if(pUmacError = 0)
+		mMachineStatus0 = mMachineStatus0 | INIT_DONE;
+	endif
+
+disable plc3
+CLOSE;

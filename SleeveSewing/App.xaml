@@ -1,0 +1,15 @@
+﻿<GoreGeneric:ApplicationBase x:Class="SleeveSewing.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:GoreGeneric="clr-namespace:Gore.Generic;assembly=GoreLibrary"
+             >
+  <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Assets/TopLevel.xaml" />
+                <ResourceDictionary Source="Assets/LEDButton.xaml" />
+                <ResourceDictionary Source="Assets/XceedToolKit_TopLevel.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</GoreGeneric:ApplicationBase>

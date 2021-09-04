@@ -1,0 +1,295 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.ComponentModel;
+using System.Xml.Serialization;
+
+namespace SleeveSewing
+{
+    public class DeploymentLine : INotifyPropertyChanged
+    {
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Instance Members 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Instance Members
+
+        private string _fiberType = string.Empty;
+        private string _deploymentLineLength = string.Empty;
+        private double _tension_cnts = 0.0;
+        private double _sewingSpeed_cm_min = 0.0;
+        private double _minSewnLength_cm = 0.0;
+        private double _stitchDensity_s_cm = 0.0;
+
+        //Slow Stitch Control
+        private double _slowStitchTimeSlice_ms = 0.0;
+        private double _slowStitchCount = 0.0;
+        private double _slowStitchRampCount = 0.0;
+        private double _slowStitchTension_cnts = 0.0;
+        private bool _useAltTensionForSlowStitches = false;
+        private bool _isLowStitchDensity = false;
+
+       
+        
+        #endregion ~Instance Members
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Construction 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Construction
+
+        public DeploymentLine()
+        {
+
+        }
+
+        #endregion ~Construction
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Properties 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Properties
+
+        public string FiberType
+        {
+            get { return _fiberType; }
+            set 
+            {
+                if (_fiberType != value)
+                {
+                    _fiberType = value;
+                    NotifyPropertyChanged("FiberType");
+                }
+            }
+        }
+
+        public string DeploymentLineLength
+        {
+            get { return _deploymentLineLength; }
+            set 
+            {
+                if (_deploymentLineLength != value)
+                {
+                    _deploymentLineLength = value;
+                    NotifyPropertyChanged("DeploymentLineLength");
+                }
+            }
+        }
+
+        public double Tension
+        {
+            get { return _tension_cnts; }
+            set 
+            {
+                if (_tension_cnts != value)
+                {
+                    _tension_cnts = value;
+                    NotifyPropertyChanged("Tension");
+                }
+            }
+        }
+
+        public double SewingSpeed
+        {
+            get { return _sewingSpeed_cm_min; }
+            set 
+            {
+                if (_sewingSpeed_cm_min != value)
+                {
+                    _sewingSpeed_cm_min = value;
+                    NotifyPropertyChanged("SewingSpeed");
+                }
+            
+            }
+        }
+
+        public double MinSewnLength
+        {
+            get { return _minSewnLength_cm; }
+            set 
+            {
+                if (_minSewnLength_cm != value)
+                {
+                    _minSewnLength_cm = value;
+                    NotifyPropertyChanged("MinSewnLength");
+                }
+            }
+        }
+
+        public double StitchDensity
+        {
+            get { return _stitchDensity_s_cm; }
+            set 
+            {
+                if (_stitchDensity_s_cm != value)
+                {
+                    _stitchDensity_s_cm = value;
+                    NotifyPropertyChanged("StitchDensity");
+                }
+            }
+        }
+
+        public double SlowStitchTimeSlice
+        {
+            get { return _slowStitchTimeSlice_ms; }
+            set
+            {
+                if (_slowStitchTimeSlice_ms != value)
+                {
+                    _slowStitchTimeSlice_ms = value;
+                    NotifyPropertyChanged("SlowStitchTimeSlice");
+                }
+            }
+        }
+
+        public double SlowStitchCount
+        {
+            get { return _slowStitchCount; }
+            set 
+            {
+                if (_slowStitchCount != value)
+                {
+                    _slowStitchCount = value;
+                    NotifyPropertyChanged("SlowStitchCount");
+                }
+            }
+        }
+
+        public double SlowStitchRampCount
+        {
+            get { return _slowStitchRampCount; }
+            set
+            {
+                if (_slowStitchRampCount != value)
+                {
+                    _slowStitchRampCount = value;
+                    NotifyPropertyChanged("SlowStitchRampCount");
+                }
+            }
+        }
+
+
+        public double SlowStitchTension
+        {
+            get { return _slowStitchTension_cnts; }
+            set 
+            {
+                    if(_slowStitchTension_cnts != value)
+                    {
+                        _slowStitchTension_cnts = value; 
+                        NotifyPropertyChanged("SlowStitchTension");
+                    }
+            }
+        }
+
+
+        public bool UseAltTensionForSlowStitches
+        {
+            get { return _useAltTensionForSlowStitches; }
+            set 
+            {
+                if (_useAltTensionForSlowStitches != value)
+                {
+                    _useAltTensionForSlowStitches = value;
+                    NotifyPropertyChanged("UseAltTensionForSlowStitches");
+                }
+            }
+        }
+
+
+
+        public bool IsLowStitchDensity
+        {
+            get { return _isLowStitchDensity; }
+            set
+            {
+                if (_isLowStitchDensity != value)
+                {
+                    _isLowStitchDensity = value;
+                    NotifyPropertyChanged("IsLowStitchDensity");
+                }
+            }
+        }
+
+      
+
+        [XmlIgnore]
+        public double StitchLength
+        {
+            get
+            {
+                if (StitchDensity == 0)
+                {
+                    return (0.0);
+                }
+                else
+                {
+                    return (1.0 / (StitchDensity / 10.0));
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double StitchCount
+        {
+            get
+            {
+                if (StitchLength == 0)
+                {
+                    return (0);
+                }
+                else
+                {
+
+                    return (Math.Ceiling((MinSewnLength * 10.0) / StitchLength) + 1.0);
+                }
+            }
+        }
+
+       
+
+        [XmlIgnore]
+        public double StitchTimeSlice
+        {
+            get
+            {
+                if (SewingSpeed == 0)
+                {
+                    return (0.0);
+                }
+                else
+                {
+                    //60000 is the Time unit in Pmac / Sewing Speed is in CM/min need to convert to mm/min
+                    return (((60000.00 * StitchLength) / (SewingSpeed * 10)) / 3.0);
+                }
+            }
+        }
+
+        #endregion ~Properties
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          INotifyPropertyChanged Interface Support
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region INotifyPropertyChanged
+
+        //Property Changed Event
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// <para>Raises the Property Changed Event Passing the source property that is updating</para>
+        /// </summary>
+        /// <param name="propertyName"></param>
+        public void NotifyPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion ~INotifyPropertyChanged
+
+    }
+}

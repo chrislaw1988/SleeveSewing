@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SleeveSewing", "SleeveSewing\SleeveSewing.csproj", "{529FAE58-0A9F-4B62-8503-78D0EF63EB10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SleeveSewing UMAC", "SleeveSewing UMAC\SleeveSewing UMAC.csproj", "{E3923299-B018-41CB-870A-A82B6FA69297}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{529FAE58-0A9F-4B62-8503-78D0EF63EB10}.Debug|x86.ActiveCfg = Debug|x86
+		{529FAE58-0A9F-4B62-8503-78D0EF63EB10}.Debug|x86.Build.0 = Debug|x86
+		{529FAE58-0A9F-4B62-8503-78D0EF63EB10}.Release|x86.ActiveCfg = Release|x86
+		{529FAE58-0A9F-4B62-8503-78D0EF63EB10}.Release|x86.Build.0 = Release|x86
+		{E3923299-B018-41CB-870A-A82B6FA69297}.Debug|x86.ActiveCfg = Debug|x86
+		{E3923299-B018-41CB-870A-A82B6FA69297}.Debug|x86.Build.0 = Debug|x86
+		{E3923299-B018-41CB-870A-A82B6FA69297}.Release|x86.ActiveCfg = Release|x86
+		{E3923299-B018-41CB-870A-A82B6FA69297}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D120B0D4-E5FE-4913-8C0D-8643CEBA6D18}
+	EndGlobalSection
+EndGlobal

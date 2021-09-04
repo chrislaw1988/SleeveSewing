@@ -1,0 +1,32 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// pmc_12_MovetToStartPosition.pmc
+;// Created on: 03/19/2013  Author: Josh Kelley
+;// 
+;// Moves the Machine To the Start Position
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+;#include "..\Headers\Download.h"
+
+OPEN PROG_12_MOVE_TO_START CLEAR
+
+	LINEAR;
+	FRAX(X);
+	ABS(X);
+	TA(200);
+	TS(75);
+	X(0) F(pXAxisFeedRate_mm_Sec * 60_SEC);
+	dwell(10);
+
+	
+	;//Set the Done Bit 
+	mMachineStatus0 = mMachineStatus0 | MOVE_TO_START_DONE;
+
+	
+
+CLOSE;

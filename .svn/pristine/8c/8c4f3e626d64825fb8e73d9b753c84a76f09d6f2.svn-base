@@ -1,0 +1,31 @@
+;Log created by PMAC Win32 Driver from file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.h
+;
+000001:            Processing Macro File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.h
+000002:            $C1450
+000003:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\Download.h
+000004:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\Const.h
+000005:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\BrickMVars.h
+000006:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\DPRVars.h
+000007:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\IVars.h
+000008:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\PVars.h
+000009:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\BrickIO.h
+000010:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\ErrorCodes.h
+000011:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_1_Startup.plc
+000012:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_2_Estop.plc
+000013:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_3_Init.plc
+000014:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_4_MessageHandler.plc
+000015:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_5_AxisMonitor.plc
+000016:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_6_SetErrorWord.plc
+000017:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_7_ClearErrorWords.plc
+000018:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PLCs\plc_8_InitIO.plc
+000019:            Total Lines: 1993
+000020:            Compiling for PLCC: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.PMA = C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.56K
+000021:            PLCC Compiling PMAC file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.PMA
+000022:            Success in Compiling to output file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.56K
+000023:            No PLCC(s) were compiled
+000024:            Downloading file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.56K
+000025:            Downloaded 763 lines in 470 msecs
+000026:            Writing MAP file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.MAP
+000027:            Writing macro dictionary table: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPLCs.TBL
+000028:            Total Warnings: 0
+000029:            Total Errors: 0

@@ -1,0 +1,515 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Diagnostics;
+using System.Threading;
+using System.IO;
+using System.Collections.ObjectModel;
+
+using Gore.MainProcess;
+using Gore.MessageBox;
+using Gore.UserAccess;
+using Gore.Generic;
+using Gore.FaultHandling;
+using Gore.ProcessControlBase;
+using Gore.Motor;
+using Gore.ProcessFlowRFID;
+using Gore.MachineManager;
+using Gore.Config.ViewModels;
+using Gore.RecipeManager;
+using System.Security.Cryptography.X509Certificates;
+
+namespace SleeveSewing
+{
+    class ProcessControl : ProcessControlBase
+    {
+        public Recipe Recipe = null; 
+        public SewingProcess _sewProcess = null;
+
+        MachineParameters settings = new MachineParameters();
+        
+
+        MotionController _motionController = Globals.MotionController;
+        SewingStateBase _sewingStateBase;
+
+        protected override void ValidateMachineParametersForMachineReset()
+        {
+            // Do nothing until we have Machine Parameters that are used in the reset.
+        }
+
+        protected override void MachineResetStarted(ref bool Abort)
+        {
+            Exception ex = null;
+
+            // Stop Alarm monitoring.
+            FaultHandling.Globals.StopAlarmMonitoring();
+
+            MainProcess.ThrowExceptionIfAborted_E(ref Abort);
+            MainProcess.Status.ProcessStatus = "Connecting to Database...";
+            try
+            {
+                Globals.ProcessControl.ConnectToDatabase(Globals.MachineParameters.DCLocation);
+            }
+            catch (Exception e) { if (ex == null) ex = e; }
+
+            MainProcess.ThrowExceptionIfAborted_E(ref Abort);
+            MainProcess.Status.ProcessStatus = "Connecting to Motion Controller...";
+
+            bool lo = false;
+            try
+            {
+                Globals.MotionController.Connect(0);
+                lo=Globals.MotionController.Initialize();
+
+            }
+            catch (Exception e) { if (ex == null) ex = e; }
+
+            if (!lo) { MainProcess.Status.ProcessStatus = "Failed to initialize..."; }
+
+            MainProcess.Status.ProcessStatus = "Downloading Machine Parameters...";
+
+            MotionController.Instance.DownLoadSettings(settings);
+
+            MainProcess.ThrowExceptionIfAborted_E(ref Abort);
+            MainProcess.Status.ProcessStatus = "Connecting to RFID Controller...";
+            try
+            {
+                try
+                {
+                    SgmsRfid.Disconnect();
+                }
+                catch { }
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (!ProcessFlowRFID.Simulation.RFID_Controller.IsSimulating)
+                    {
+                        SgmsRfid.Connect(Globals.MachineParameters.MaxHeadCount, Globals.MachineParameters.RfidIpAddress, true);
+                    }
+                });
+            }
+            catch (Exception e) { if (ex == null) ex = e; }
+
+            MainProcess.ThrowExceptionIfAborted_E(ref Abort);
+            MainProcess.Status.ProcessStatus = "Connecting to Barcode Reader...";
+            try
+            {
+                try
+                {
+                    Globals.DataManReader.Disconnect();
+                }
+                catch { }
+                Globals.DataManReader.Connect("10.10.10.11");
+            }
+            catch (Exception e) { if (ex == null) ex = e; }
+
+            if (ex != null) { throw ex; }
+
+            FaultHandling.Globals.StartAlarmMonitoring();
+
+            MachineManager.Bindings.IsUnlocked = false;
+        }
+
+        protected override void ValidateMachineParametersForHome()
+        {
+            // Validate Machine Velocity since it's passed down to the controller.
+            Globals.MachineParameters.ValidateMachineVelocity_E();
+        }
+
+        protected override void HomeStarted(ref bool Abort)
+        {
+            Globals.Messages.AddMessage("Homing...");
+            bool res = MotionController.Instance.DoHome();
+        }
+
+
+        protected override void HomeCompleted()
+        {
+            // Turn On Safe Speed Mode.  Leave the machine in a state that the operator can access.
+            try
+            {
+                //DeltaTau.TurnOffSafeSpeedModeNoWait_E(false);
+            }
+            catch { }
+        }
+
+        protected override bool CanStartCycle()
+        {
+            return true;
+        }
+
+
+        protected override void CycleStarted(ref bool Abort, ref bool Stop, out bool ReachedPointOfNoReturn)
+        {
+            ReachedPointOfNoReturn = false;
+
+            // Insert RFID.
+            PromptLoadRFID(ref Abort);
+
+            // Prompt to load fiber into head, please press continue
+            PromptLoadFiberToHead(ref Abort);
+
+            //Prompt to place sleeve to the left clamp, please press continue
+            PromptPlaceSleeveToLeftClamp(ref Abort);
+
+            //Left Sleeve Clamp On
+            
+
+            MotionController.Instance.SetDigitalOutput(MotionControllerConst.DigitalOutputs.LeftSleeveClamp, true);
+
+
+            //Prompt to place sleeve to the right clamp, please press continue
+            PromptPlaceSleeveToRightClamp(ref Abort);
+
+            //Lock The Slide
+            MotionController.Instance.SetDigitalOutput(MotionControllerConst.DigitalOutputs.TailStockAdjust, true);
+
+            //Clamp the Sleeve
+            MotionController.Instance.SetDigitalOutput(MotionControllerConst.DigitalOutputs.RightSleeveClamp, true);
+
+            //Tension The Sleeve
+            int t = Int16.Parse(Recipe.Tension);
+            MotionController.Instance.SetDigitalOutput(MotionControllerConst.DigitalOutputs.SleeveTension, true);
+            MotionController.Instance.SetDac(MotionControllerConst.DACSignals.SleeveTension,t); 
+
+            //Prompt to thread fiber to clamp, please press continue
+            ThreadFiberToClamp(ref Abort);
+
+            //Right Thread Clamp On
+            MotionController.Instance.SetDigitalOutput(MotionControllerConst.DigitalOutputs.RightThreadClamp, true);
+            MotionController.Instance.SetDigitalOutput(MotionControllerConst.DigitalOutputs.LeftThreadClamp, true);
+
+            //Prompt to start sewing, please press continue
+            PromptStartSewing(ref Abort);
+
+            if (Recipe != null)
+            {
+
+                //DownLoad the Recipe
+                bool lo = MotionController.Instance.DownloadRecipe(Recipe);
+                if (lo == false)
+                {
+                    Globals.Messages.AddMessage("Recipe \"" + Recipe.Name + "\"error.");
+                    return;
+                }
+
+                // Recipe Running.
+                Globals.Messages.AddMessage("Recipe \"" + Recipe.Name + "\" Running.");
+
+                ReachedPointOfNoReturn = true;
+                
+            }
+
+
+            // Recipe Running.
+            Globals.Messages.AddMessage("Recipe \"" + Recipe.Name + "\" Running.");
+
+            
+            // Find Barcode.
+            string Barcode = null;
+            if(!Gore.Cognex.CognexDataMan.Simulation.IsSimulating && Recipe.EnableBarcode.Value)
+            {
+                MainProcess.Status.ProcessStatus = "Searching for Mandrel Barcode.";
+
+                // Find Barcode.
+                FindBarcode_E(out Barcode, ref Abort);
+//#warning remove when TurnOffSafeSpeed works
+                //DO.TurnOn_MachineLight.SetOutput_E(true);
+                
+                Globals.Messages.AddMessage($"Recipe Barcode: {Recipe.Barcode}. Mandrel barcode read: {Barcode}.");
+
+                // Validate barcode (matches recipe).
+                RecipeManager.ValidateMandrelBarcode(Recipe.Barcode, Barcode);
+
+                // Write out the full barcode.
+                WriteData(Gore.DataCollection.Key_Enum.MandrelSerialNumber, Barcode);
+            }
+
+           
+
+            if (Globals.MotionController.HomeState == MotionController.HomedState.MachineHomed)
+            {
+
+
+                if (_sewProcess.IsIdleState || _sewProcess.IsLoadState)
+                {
+                    _sewProcess.Start();
+                }
+                else
+                {
+                    //message pops up saying that the sew state is not in idle or load state 
+                    Globals.Messages.AddMessage("The Sew State is not in idle or load state, please abort and home");
+                }
+
+
+            }
+
+            else
+            {
+                //message pops up saying that the machine is not homed
+                Globals.Messages.AddMessage("The Sew State is not in idle or load state, please abort and home");
+            }
+
+            Globals.Messages.AddMessage("Recipe \"" + Recipe.Name + "\" Complete.");
+        }
+
+        protected override void CleanupCycle(ProcessResult_Enum ProcessResult)
+        {
+            Exception CleanupException = null;
+
+            if(ProcessResult != ProcessResult_Enum.Normal)
+            {
+                Globals.Messages.AddMessage($"Recipe \"{Recipe.Name}\" {ProcessResult.ToString()}.");
+            }
+
+            CycleCleanup(CleanupException);
+
+            if (CleanupException != null)
+            {
+                throw CleanupException;
+            }
+        }
+
+         
+        protected override void MoveToUnloadAndUnlock(ref bool Abort, ProcessResult_Enum ProcessResult)
+        {
+            // If something not normal happens, make sure to prompt to cut film so we can move to an unload position.
+            if (ProcessResult != ProcessResult_Enum.Normal)
+            {
+                try
+                {
+                    //PromptCutFilm_E(ref Abort);
+                }
+                catch { }
+            }
+
+            try
+            {
+                // Try to move back to the start position for tact time, otherwise, just move home.
+                MainProcess.Status.ProcessStatus = "Moving to Unload Position.";
+
+                // Move home.
+                Globals.MotionController.DoHome();
+                
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    // Abort motion.  Leave motors enabled.
+                    Globals.MotionController.DoAbort();
+                }
+                catch { }
+
+                MessageBoxEx.ShowError(ex, "Failed to move to the unload position.");
+            }
+
+            // Turn off abort since we passed the moves.
+            MainProcess.Status.AbortButton_IsEnabled = false;
+
+        }
+       
+
+        
+        /////////////////////////////////////////////////////////////////////
+        // CycleCleanup
+        /////////////////////////////////////////////////////////////////////
+        void CycleCleanup(Exception CleanupException)
+        {
+            // Try catch everything seperately so we make sure we perform each cleanup task.
+
+            // Stop any motion programs (including the wrap).
+            try
+            {
+                Globals.MotionController.DoAbort();
+            }
+            catch (Exception ex) { if (CleanupException == null) { CleanupException = ex; } }
+
+            // Kill all motors so they are not enabled.
+            try
+            {
+                Globals.MotionController.CloseController();
+            }
+            catch (Exception ex) { if (CleanupException == null) { CleanupException = ex; } }
+
+            // Kill Wrap PLC.
+            try
+            {
+                
+            }
+            catch (Exception ex) { if (CleanupException == null) { CleanupException = ex; } }
+        }
+
+    
+        /////////////////////////////////////////////////////////////////////
+        // CheckForHomeError_E
+        /////////////////////////////////////////////////////////////////////
+        void CheckForHomeError_E()
+        {
+
+            if (_motionController.HomeState.Equals(1))
+            {
+                _sewingStateBase.ShowError("Machine is not able to be homed");
+            }
+            
+
+            
+        }
+
+
+        /////////////////////////////////////////////////////////////////////
+        // AbortAxes
+        /////////////////////////////////////////////////////////////////////
+        void AbortAxes(Exception CleanupException)
+        {
+            try
+            {
+                // Abort Coordinate System motion, then wait for the PLC to finish.
+                _motionController.DoAbort();
+                
+            }
+            catch (Exception ex) { if (CleanupException == null) { CleanupException = ex; } }
+        }
+
+        public void AbortProcess()
+        {
+            MainProcess.AbortProcess();
+        }
+
+
+        /////////////////////////////////////////////////////////////////////
+        // PromptLoadRFID
+        /////////////////////////////////////////////////////////////////////
+        void PromptLoadRFID(ref bool Aborted)
+        {
+            // Prompt.
+            WaitForOperatorTaskAcknowledge("Please insert RFID...", "Insert RFID", "Loading RFID", true);
+        }
+
+        /////////////////////////////////////////////////////////////////////
+        // PromptLoadFiberToHead
+        /////////////////////////////////////////////////////////////////////
+        void PromptLoadFiberToHead(ref bool Aborted)
+        {
+            // Prompt.
+            WaitForOperatorTaskAcknowledge("Thread fiber into head, needle if neccesary.\nPress Continue when complete.", "Load Fiber to Head", "Running Fiber to Head", true);
+        }
+
+        /////////////////////////////////////////////////////////////////////
+        // PromptPlaceSleeveToLeftClamp
+        /////////////////////////////////////////////////////////////////////
+        void PromptPlaceSleeveToLeftClamp(ref bool Aborted)
+        {
+            // Prompt.
+            WaitForOperatorTaskAcknowledge("Place non-angle sleeve end into the left clamp.\nPress Continue when complete.", "Load sleeve to clamp", "Running sleeve to clamp", true);
+        }
+
+        /////////////////////////////////////////////////////////////////////
+        // PromptPlaceSleeveToRightClamp
+        /////////////////////////////////////////////////////////////////////
+        void PromptPlaceSleeveToRightClamp(ref bool Aborted)
+        {
+            // Prompt.
+            WaitForOperatorTaskAcknowledge("Place angled sleeve end into the right clamp.\nPress Continue when complete.", "Load sleeve to clamp", "Running sleeve to clamp", true);
+        }
+
+        /////////////////////////////////////////////////////////////////////
+        // ThreadFiberToClamp
+        /////////////////////////////////////////////////////////////////////
+        void ThreadFiberToClamp(ref bool Aborted)
+        {
+            // Prompt.
+            WaitForOperatorTaskAcknowledge("Thread fiber into clamp.\nPress Continue when complete.", "Load fiber to clamp", "Running fiber to clamp", true);
+        }
+
+        /////////////////////////////////////////////////////////////////////
+        // PromptStartSewing
+        /////////////////////////////////////////////////////////////////////
+        void PromptStartSewing(ref bool Aborted)
+        {
+            // Prompt.
+            WaitForOperatorTaskAcknowledge("Press Continue to start sewing", "Ready to sew", "Running sewing", true);
+        }
+
+        
+
+        /////////////////////////////////////////////////////////////////////
+        // FindBarcode_E
+        /////////////////////////////////////////////////////////////////////
+        protected void FindBarcode_E(
+            out string Barcode,
+            ref bool Cancel,
+            bool MoveToFoundPosition = false
+            )
+        {
+            // Read in place (before moving).
+            string FoundBarcode = Globals.DataManReader.Read_Sync(() => { return MainProcess.IsProcessAborted(); });
+            if (!String.IsNullOrEmpty(FoundBarcode))
+            {
+                Barcode = FoundBarcode;
+                return;
+            }
+
+            try
+            {
+                // Start the reader continuously reading
+                Globals.DataManReader.Read_Async(Gore.Cognex.DataManTriggerType.Continuous);
+                
+                
+                // Did we read anything?
+                if (!Globals.DataManReader.ResultReceived)
+                {
+                    throw new Exception("Cannot find barcode.");
+                }
+
+                // Get the current position and barcode
+               
+                Barcode = Globals.DataManReader.Result;
+            }
+            finally
+            {
+                // Always stop the rotary.
+                try
+                {
+                   
+                }
+                catch { }
+
+                // Always stop the reader.
+                try
+                {
+                    Globals.DataManReader.ReaderOff();
+                }
+                catch { }
+            }
+
+        }
+        
+
+        /////////////////////////////////////////////////////////////////////
+        // Overrides
+        /////////////////////////////////////////////////////////////////////
+
+        public override DataEntryObjectsViewModel GetDataEntryObjectsViewModel()
+        {
+            return new DataEntryObjectsViewModel()
+            {
+                ActiveDirectorySettingsViewModel = Globals.MachineParameters.ActiveDirectorySettingsViewModel,
+                RejectCodePrompt = Globals.MachineParameters.RejectCodePrompt,
+                Items = dataEntryItems?.Items
+            };
+        }
+
+        protected override void GetMachineType(out string machineType)
+        {
+            machineType = Globals.MachineParameters.MachineType;
+        }
+
+        protected override void GetEndpointName(out string endpointName)
+        {
+            endpointName = Globals.MachineParameters.EndpointName;
+        }
+    }
+}

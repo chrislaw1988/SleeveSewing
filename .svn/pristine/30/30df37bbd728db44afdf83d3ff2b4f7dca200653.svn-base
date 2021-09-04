@@ -1,0 +1,80 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// plc_6_SetErrorWord.plc
+;// Created : 01/14/2013  Author: Josh Kelley
+;//
+;//	 Fills The Available ErrorWord with The Current Error "pUmacError (p1)"
+;//  We have 5 Error Word Locations mSystemError0 - mSystemError4 m7510 - m7514)
+;//  This PLC Loops through The Error Words Looking For an Empty Slot  
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+CLOSE
+DELETE GATHER
+OPEN PLC_6_SET_ERROR CLEAR
+
+	pErrorIndex = 0
+
+	pSlotAvailable = FALSE
+
+	if(pUmacError != 0)
+		pErrorLogged = FALSE
+	endif
+
+	;//Increment a pointer through the error words to find an open slot
+	;//We Have 5 Error Words m7510-m7514 
+	while(pErrorIndex < MAX_ERROR_WORDS and pErrorLogged = FALSE)
+
+		;//Check to see if the error word is available
+		;//If so, then increment all current errors up one slot to 
+		;//place the last error in the last slot
+
+		;//The Start Location is 7510 --> (m7510 = mSystemError0)
+		pErrorStartLoc = 7510
+		if(m(pErrorStartLoc + pErrorIndex) = 0)
+	
+			;//Check to see if the error already exists
+			pErrorSet = FALSE
+			pErrorChckIndex = 0
+			while(pErrorChckIndex < MAX_ERROR_WORDS)
+		
+				if(m(pErrorStartLoc + pErrorChckIndex) = pUmacError)
+			
+					pErrorSet = TRUE
+				
+				endif
+			
+				;//Index to the Next Slot 
+				pErrorChckIndex = pErrorChckIndex + 1
+			
+			endwhile
+		
+			;//If the error is !set add it to the error words
+			if(pErrorSet = FALSE)		
+				m(pErrorStartLoc + pErrorIndex) = pUmacError;
+				pUmacError = 0
+			endif
+		
+			pErrorLogged = TRUE
+		
+			pUmacError = 0
+		
+		else
+	
+			;//Index to the Next Slot
+			pErrorIndex = pErrorIndex + 1
+		
+		endif
+	
+		;//Reset the pointer if it has cycled through all the words
+		if(pErrorIndex = MAX_ERROR_WORDS)
+	
+			pUmacError = 0
+			pErrorLogged = TRUE
+		
+		endif	
+	
+	endwhile 
+
+CLOSE;

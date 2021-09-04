@@ -1,0 +1,55 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// plc_8_InitIO.plc
+;// Created : 09/05/2013  Author: Josh Kelley
+;//
+;//	 Initializes IO To a safe state, Runs on startup or on error conditions	
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+CLOSE
+DELETE GATHER
+OPEN PLC_8_INIT_IO CLEAR
+
+	;//Clean Up the IO States
+
+	;//Control Kill of  Thread Brake Tension
+	if(dac3RhtThreadBrakeTension_cnts > 0)
+		
+		while (dac3RhtThreadBrakeTension_cnts > 50)
+			dac3RhtThreadBrakeTension_cnts = dac3RhtThreadBrakeTension_cnts - (dac3RhtThreadBrakeTension_cnts *0.30)
+			mCoor1Timer1= 150 CRD1_TMR_COUNTDOWN
+		endwhile
+		dac3RhtThreadBrakeTension_cnts = 0
+
+	endif
+
+	if(dac2LftThreadBrakeTension_cnts > 0)
+		
+		while (dac2LftThreadBrakeTension_cnts > 50)
+			dac2LftThreadBrakeTension_cnts = dac2LftThreadBrakeTension_cnts - (dac2LftThreadBrakeTension_cnts *0.30)
+			mCoor1Timer1= 150 CRD1_TMR_COUNTDOWN
+		endwhile
+		dac2LftThreadBrakeTension_cnts = 0
+	endif
+
+	;//On one of the machines 0v left ~40mv on the dac signal DT said it was in spec, I decided to drive it -1v for 0 
+	;//This signal is the presssure regulator and 40mv is enough for it to try and control pressure
+	dac1SleveTension_cnts =-81;
+
+	oLeftSleeveClamp = RETRACT;
+	oRightSleeveClamp = RETRACT;
+	oSleeveTension = RETRACT;
+	oTailStockAdj = RETRACT;
+	oLeftThreadClamp = RETRACT;
+	oRightThreadClamp = RETRACT;
+	oNeedleBlock = 0;
+	
+	;//Toggle the Regulator
+	;//oRegulatorOn = OFF;
+	mCoor1Timer1= 100 CRD1_TMR_COUNTDOWN
+	;//oRegulatorOn = ON;
+
+DIS PLC_8_INIT_IO
+CLOSE;

@@ -1,0 +1,29 @@
+;Log created by PMAC Win32 Driver from file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.h
+;
+000001:            Processing Macro File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.h
+000002:            $C1450
+000003:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\Download.h
+000004:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\Const.h
+000005:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\BrickMVars.h
+000006:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\DPRVars.h
+000007:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\IVars.h
+000008:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\PVars.h
+000009:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\BrickIO.h
+000010:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\Headers\ErrorCodes.h
+000011:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PMCs\pmc_1_Home.pmc
+000012:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PMCs\pmc_10_SewLeft.pmc
+000013:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PMCs\pmc_11_SewRightHead.pmc
+000014:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PMCs\pmc_12_MoveToStartPosition.pmc
+000015:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PMCs\pmc_13_LoopOut360deg.pmc
+000016:            Including file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\..\PMCs\pmc_14_SewRightReverseLooper.pmc
+000017:            Total Lines: 1870
+000018:            Compiling for PLCC: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.PMA = C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.56K
+000019:            PLCC Compiling PMAC file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.PMA
+000020:            Success in Compiling to output file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.56K
+000021:            No PLCC(s) were compiled
+000022:            Downloading file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.56K
+000023:            Downloaded 747 lines in 481 msecs
+000024:            Writing MAP file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.MAP
+000025:            Writing macro dictionary table: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\Headers\DownloadPMCs.TBL
+000026:            Total Warnings: 0
+000027:            Total Errors: 0

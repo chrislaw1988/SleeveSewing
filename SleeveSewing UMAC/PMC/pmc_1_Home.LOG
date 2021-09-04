@@ -1,0 +1,44 @@
+;Log created by PMAC Win32 Driver from file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+;
+000001:            Processing Macro File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000002:            $C1DD0
+000003:            Total Lines: 141
+000004:            Compiling for PLCC: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.PMA = C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.56K
+000005:            PLCC Compiling PMAC file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.PMA
+000006:            Success in Compiling to output file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.56K
+000007:            No PLCC(s) were compiled
+000008:            Downloading file: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.56K
+000009:            **PMAC Error 3, Data error or unrecognized command.
+000010:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000011:              Line: 16, "OPEN PROG_1_HOME CLEAR;16"
+000012:            **PMAC Error 3, Data error or unrecognized command.
+000013:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000014:              Line: 18, "MAXIS1HOMEDONE = FALSE;18"
+000015:            **PMAC Error 3, Data error or unrecognized command.
+000016:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000017:              Line: 19, "MAXIS2HOMEDONE = FALSE;19"
+000018:            **PMAC Error 3, Data error or unrecognized command.
+000019:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000020:              Line: 20, "MAXIS3HOMEDONE = FALSE;20"
+000021:            **PMAC Error 3, Data error or unrecognized command.
+000022:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000023:              Line: 21, "MAXIS4HOMEDONE = FALSE;21"
+000024:            **PMAC Error 3, Data error or unrecognized command.
+000025:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000026:              Line: 24, "ONEEDLEBLOCK = 0;24"
+000027:            **PMAC Error 5, Command not allowed unless buffer is open.
+000028:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000029:              Line: 25, "DWELL(1);25"
+000030:            **PMAC Error 3, Data error or unrecognized command.
+000031:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000032:              Line: 28, "IAXIS1FOLLOWERROR = PLNEEDLEHOMEFFE;28"
+000033:            **PMAC Error 3, Data error or unrecognized command.
+000034:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000035:              Line: 29, "IAXIS1HOMEVEL = 1;29"
+000036:            **PMAC Error 3, Data error or unrecognized command.
+000037:              File: C:\Users\jkelley\Documents\JOBS\SPASM\Code\SPASM\SPASM\UMAC\PMCs\pmc_1_Home.pmc
+000038:              Line: 30, "IAXIS1HOMEOFFSET = PLNEEDLEHOMEOFFSET;30"
+000039:            Download aborted. Errors exceed 10 maximum.
+000040:            Downloaded 55 lines in 193 msecs
+000041:            Total Warnings: 0
+000042:            Total Errors: 10

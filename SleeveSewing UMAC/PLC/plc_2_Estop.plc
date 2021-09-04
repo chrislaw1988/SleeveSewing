@@ -1,0 +1,41 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// plc_2_Estop.plc
+;// Created : 01/10/2013  Author: Josh Kelley
+;//
+;// Monitors for Estop
+;//		
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+OPEN PLC_2_ESTOP CLEAR
+
+	if(iSystemEstopped = FALSE)
+
+		pUmacError = ESTOP_ERROR;
+
+		;//Abort All programs and Kill all of the Motors
+		command ^A
+		command ^K
+		mCoor1Timer1= 200 CRD1_TMR_COUNTDOWN
+
+		;//command "SAVE";
+		;//mCoor1Timer1= 200 CRD1_TMR_COUNTDOWN
+		;//command "$$$";
+		;//mCoor1Timer1= 200 CRD1_TMR_COUNTDOWN
+
+		;//Enable the IO Init PLC
+		enable plc 8;
+
+		mMachineStatus0 = 0;
+		mMachineControl0 = 0;
+
+
+
+	ENDIF ;// end (iSystemEstopped = FALSE)
+
+CLOSE

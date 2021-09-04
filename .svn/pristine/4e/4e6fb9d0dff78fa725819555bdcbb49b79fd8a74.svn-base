@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E3923299-B018-41CB-870A-A82B6FA69297}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SleeveSewingUMAC</RootNamespace>
+    <AssemblyName>SleeveSewing UMAC</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Generic\Generic_Consts.h" />
+    <Content Include="Generic\Generic_Ivars.h" />
+    <Content Include="Generic\GenericTurboMvars%28PMAC2%29.h" />
+    <Content Include="Generic\GenericUmacMvarsDefs.h" />
+    <Content Include="Headers\BrickIO.h" />
+    <Content Include="Headers\BrickMVars.h" />
+    <Content Include="Headers\Const.h" />
+    <Content Include="Headers\Download.h" />
+    <Content Include="Headers\DownloadPLCs.h" />
+    <Content Include="Headers\DownloadPMCs.h" />
+    <Content Include="Headers\DownloadUMAC.h" />
+    <Content Include="Headers\DPRVars.h" />
+    <Content Include="Headers\ErrorCodes.h" />
+    <Content Include="Headers\Include.h" />
+    <Content Include="Headers\IO.h" />
+    <Content Include="Headers\IVars.h" />
+    <Content Include="Headers\MVars.h" />
+    <Content Include="Headers\PVars.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PLC\plc_1_Startup.plc" />
+    <None Include="PLC\plc_2_Estop.plc" />
+    <None Include="PLC\plc_3_Init.plc" />
+    <None Include="PLC\plc_4_MessageHandler.plc" />
+    <None Include="PLC\plc_5_AxisMonitor.plc" />
+    <None Include="PLC\plc_6_SetErrorWord.plc" />
+    <None Include="PLC\plc_7_ClearErrorWords.plc" />
+    <None Include="PLC\plc_8_InitIO.plc" />
+    <None Include="PMC\pmc_10_SewLeft.pmc" />
+    <None Include="PMC\pmc_10_SewLeftTag.pmc" />
+    <None Include="PMC\pmc_11_SewRightHead.pmc" />
+    <None Include="PMC\pmc_12_MoveToStartPosition.pmc" />
+    <None Include="PMC\pmc_13_LoopOut360deg.pmc" />
+    <None Include="PMC\pmc_14_SewRightReverseLooper.pmc" />
+    <None Include="PMC\pmc_50_HomeDebug.pmc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

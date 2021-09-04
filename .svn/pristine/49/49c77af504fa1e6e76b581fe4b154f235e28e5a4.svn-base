@@ -1,0 +1,67 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace SleeveSewing
+{
+    class StatePayoutLeftDeploymentLine : SewingStateBase
+    {
+       
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Construction
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Construction
+        public StatePayoutLeftDeploymentLine(SewingProcess sewProcess, string stateDescription)
+            :base(sewProcess, stateDescription)
+        {
+           
+        }
+
+        #endregion ~Construction
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          SewStateBase Overrides
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region StateBase Overrides
+
+        public override void ExecuteState()
+        {
+            bool showForLeftSide = true;
+            
+
+            if (SewingProcess.IsErrored == true)
+            {
+                SewingProcess.IsErrored = false;
+                return;
+            }
+
+            if (SetupManager.Instance.Settings.ReverselooperInstalled == true)
+            {
+                if (SleeveSewing.Globals.MachineParameters.IsDualLine)
+                {
+                    SewProcess.State = SewProcess.SewRightSideState;
+                }
+                else
+                {
+                    SewProcess.State = SewProcess.LoopOutLastStitchState;
+                }
+            }
+            else
+            {
+                SewProcess.State = SewProcess.LoopOutLastStitchState;
+            }
+
+            SewProcess.ExecuteState();
+        }
+
+        public override void SetMotionEvent(bool success)
+        {
+            
+        }
+
+        #endregion ~StateBase Overrides
+
+    }
+}

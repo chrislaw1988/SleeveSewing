@@ -1,0 +1,42 @@
+﻿;////////////////////////////////////////////////////////////////////////////////////////////
+;// 
+;// plc_1_Startup.plc
+;// Created : 01/08/2013  Author: Josh Kelley
+;//
+;// This PLC runs on Controller Power Up only,
+;//		Sets up Acc65E IO Registers
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+
+OPEN PLC_1_STARTUP CLEAR
+
+disable plc2..31
+
+
+mMachineControl0 = 0;
+mMachineStatus0 = 0;
+pUmacError = 0;
+
+;//Enable the IO Init PLC
+enable plc 8;
+
+
+;//enable the Set error word plc
+enable plc 6;
+
+;//enable the Estop PLC
+enable plc 2;
+
+;//Enable the Message Handler
+enable plc 4;
+
+;//enable the axis monitor
+enable plc 5;
+
+
+DIS PLC_1_STARTUP
+CLOSE

@@ -1,0 +1,145 @@
+﻿;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// pmc_10_SewLeftTag.pmc
+;// Created on: 08/22/2014  Author: Josh Kelley
+;// 
+;// Development PMC for Sewing TAG Style Sleeves
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+#include "..\Headers\DownloadUMAC.h"
+
+OPEN PROG 10 CLEAR
+
+	;//Loop out 360 deg with the Looper motor, We need to do this as if we are sewing twin stitch sleeves 
+	;//Because we leave the looper engaged for the last stitch for deploying the deployment line and we sew the 
+	;//Right side of the sleeve first
+
+	INC;
+	pvt(pLHeadStitchTimeSlice * 3)
+	C 360.0 :3.723;
+	dwell(1);
+
+	;//Move to The Start Position ( this is the offset from home on where the left side stitching starts)
+	LINEAR;
+	FRAX(X);
+	ABS(X);
+	TA(200);
+	TS(75);
+	X(pStartPosition_mm) F(pXAxisFeedRate_mm_Sec *60_SEC);
+	dwell(10);
+	
+	;//Index the Sewing Motors
+	INC;
+	TM(250);
+	A(30)C(30);
+
+
+	;//Do The SlowStitches
+	pStitchIdx = 0;
+	dac2LftThreadBrakeTension_cnts == pLHeadSlowStitchTension;
+	while(pStitchIdx < pLHeadSlowStitchCount and pStitchIdx < pLHeadStitchCnt)
+
+		if(pLHeadUseAltStartTension = TRUE or pLHeadSewLowStitchDensity = TRUE)
+
+			PVT(pLHeadSlowStitchTimeSlice);
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X 0.00:0.00 A 67.69:3.723 C 67.69:3.723;
+			dac2LftThreadBrakeTension_cnts == pLHeadSlowStitchTension;
+			X (pLHeadStitchLength_mm):(pLHeadStitchLength_mm / 30.0) A 0.00:0 C0.0:0;
+			dac2LftThreadBrakeTension_cnts == pLHeadFiberTension_cnts;
+
+		else
+
+			PVT(pLHeadSlowStitchTimeSlice);
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X (pLHeadStitchLength_mm):(pLHeadStitchLength_mm / 30.0) A 67.69:3.723 C 67.69:3.723;
+		
+		endif
+		
+		pStitchIdx = pStitchIdx + 1;
+	endwhile
+
+	;//Release the Left Thread Clamp
+	oLeftThreadClamp == 0;
+
+
+	;//Calculate the Ramp Rate (Make Sure our Time Slice Is Faster than Our Slow Stitch Time Slice
+	if( (pLHeadSlowStitchTimeSlice - pLHeadStitchTimeSlice) > 0)
+		pStitchRampRate = ((pLHeadSlowStitchTimeSlice - pLHeadStitchTimeSlice) / pLHeadSlowStitchRampCount);
+	else
+		pStitchRampRate = 0.0;
+	endif
+
+
+	;//Sew The Remaining amout Of Stitches
+	pRampStitchIdx = 0;
+	while(pStitchIdx < pLHeadStitchCnt)
+		
+		if(pRampStitchIdx < pLHeadSlowStitchRampCount)
+			PVT((pLHeadSlowStitchTimeSlice - (pRampStitchIdx + 1 * pStitchRampRate)))
+			pRampStitchIdx = pRampStitchIdx + 1;
+		else
+			PVT(pLHeadStitchTimeSlice)
+		endif
+
+		if(pLHeadUseAltStartTension = TRUE and pRampStitchIdx < pLHeadSlowStitchRampCount or pLHeadSewLowStitchDensity = TRUE)
+
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X 0.00:0.00 A 67.69:3.723 C 67.69:3.723;
+			dac2LftThreadBrakeTension_cnts == pLHeadSlowStitchTension;
+			X (pLHeadStitchLength_mm):(pLHeadStitchLength_mm / 30.0) A 0.00:0 C0.0:0;
+			dac2LftThreadBrakeTension_cnts == pLHeadFiberTension_cnts;
+
+		else
+
+			if(pRampStitchIdx < pLHeadSlowStitchRampCount)
+			
+				dac2LftThreadBrakeTension_cnts == pLHeadSlowStitchTension;
+			else
+				dac2LftThreadBrakeTension_cnts == pLHeadFiberTension_cnts;
+			endif
+
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X 0.00:0.00 A 146.155:4.151667 C 146.155:4.151667;
+			X (pLHeadStitchLength_mm):(pLHeadStitchLength_mm / 30.0) A 67.69:3.723 C 67.69:3.723;
+
+		endif
+	
+		
+		
+		pStitchIdx = pStitchIdx + 1;
+
+	endwhile
+
+
+	dwell(0);
+	;//Kill the Thread Brake Tension
+	while (dac2LftThreadBrakeTension_cnts > 50)
+
+		dac2LftThreadBrakeTension_cnts = dac2LftThreadBrakeTension_cnts - (dac2LftThreadBrakeTension_cnts *0.30)
+		dwell(150)
+	endwhile
+
+	dac2LftThreadBrakeTension_cnts = 0;
+
+
+	;//Reset the Needle Looper Orientation
+	INC;
+	TM(250);
+	A(-30)C(-30);
+
+
+	;//Set the Done Bit 
+	mMachineStatus0 = mMachineStatus0 | SEW_LEFT_HEAD_DONE;
+
+
+
+CLOSE
+

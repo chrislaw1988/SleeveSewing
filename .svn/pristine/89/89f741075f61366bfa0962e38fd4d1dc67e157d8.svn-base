@@ -1,0 +1,617 @@
+﻿<Window x:Class="SleeveSewing.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:SleeveSewing_NameSpace="clr-namespace:SleeveSewing"
+        xmlns:Generic_NameSpace="clr-namespace:Gore.Generic;assembly=GoreLibrary"
+        xmlns:Header_NameSpace="clr-namespace:Gore.Header;assembly=GoreLibrary"
+        xmlns:ValueConverters_NameSpace="clr-namespace:Gore.Generic.ValueConverters;assembly=GoreLibrary"
+        xmlns:RecipeManager_NameSpace="clr-namespace:Gore.RecipeManager;assembly=RecipeManager"      
+        xmlns:MachineManager_NameSpace="clr-namespace:Gore.MachineManager;assembly=MachineManager"
+        xmlns:FaultHandling_NameSpace="clr-namespace:Gore.FaultHandling;assembly=FaultHandling"
+        xmlns:MessageBox_NameSpace="clr-namespace:Gore.MessageBox;assembly=GoreLibrary"
+        xmlns:MainProcess_NameSpace="clr-namespace:Gore.MainProcess;assembly=MainProcess"
+        xmlns:SubProcess_NameSpace="clr-namespace:Gore.MainProcess.SubProcess;assembly=MainProcess"
+        xmlns:Motor_NameSpace="clr-namespace:Gore.Motor;assembly=Motor"
+        xmlns:IO_NameSpace="clr-namespace:Gore.IO;assembly=IO"
+        xmlns:RFID_NameSpace="clr-namespace:Gore.ProcessFlowRFID;assembly=ProcessFlowRFID"
+        xmlns:XceedNameSpace="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit" 
+        mc:Ignorable="d"
+        d:DesignWidth="1700"
+        d:DesignHeight="1080"
+        Icon="{StaticResource icnGoreIcon}"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Closing="Window_Closing"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        SizeToContent="Manual"
+        x:Name="RootWindow"
+        Title="SPASM"
+        Style="{StaticResource GoreWindowStyle}"
+        SnapsToDevicePixels="True" Loaded="RootWindow_Loaded"
+        xmlns:rfid="clr-namespace:Gore.PF.RFID;assembly=Gore.PF.RFID"
+        xmlns:config="clr-namespace:Gore.Config;assembly=Gore.Config"
+        xmlns:eSig="clr-namespace:Gore.ESig.Views;assembly=Gore.ESig"
+        xmlns:mams="clr-namespace:Gore.Mams.Views;assembly=Gore.Mams"
+        xmlns:configViews="clr-namespace:Gore.Config.Views;assembly=Gore.Config"
+        xmlns:mamsV="clr-namespace:Gore.Mams.Views;assembly=Gore.Mams"
+        >
+    <Window.Resources>
+        <Style TargetType="{x:Type Generic_NameSpace:TabControlEx}" BasedOn="{StaticResource {x:Type TabControl}}"/>
+        <ValueConverters_NameSpace:LoggedIn_Converter x:Key="LoggedIn_ConverterVariable"/>
+        <ValueConverters_NameSpace:OperatorAccessLevel_Converter x:Key="OperatorAccessLevel_ConverterVariable"/>
+        <ValueConverters_NameSpace:MaintenanceAccessLevel_Converter x:Key="MaintenanceAccessLevel_ConverterVariable"/>
+        <ValueConverters_NameSpace:ProcessEngineerAccessLevel_Converter x:Key="ProcessEngineerAccessLevel_ConverterVariable"/>
+        <ValueConverters_NameSpace:MachineOwnerAccessLevel_Converter x:Key="MachineOwnerAccessLevel_ConverterVariable"/>
+        <ValueConverters_NameSpace:BoolToVisibility_Converter x:Key="BoolToVisibility_ConverterVariable"/>
+        <ValueConverters_NameSpace:NotBoolToVisibility_Converter x:Key="NotBoolToVisibility_ConverterVariable"/>
+        <ValueConverters_NameSpace:VisibilityToBool_Converter x:Key="VisibilityToBool_ConverterVariable"/>
+        <ValueConverters_NameSpace:NotVisibilityToBool_Converter x:Key="NotVisibilityToBool_ConverterVariable"/>
+        <ValueConverters_NameSpace:BoolToNotBool_Converter x:Key="BoolToNotBool_ConverterVariable"/>
+        <ValueConverters_NameSpace:NullableBoolToBool_Converter x:Key="NullableBoolToBool_ConverterVariable" />
+        <ValueConverters_NameSpace:TrueFalseYesNo_Converter x:Key="TrueFalseYesNo_ConverterVariable"/>
+        <ValueConverters_NameSpace:IsSelected_Converter x:Key="IsSelected_ConverterVariable"/>
+        <ValueConverters_NameSpace:NullObjectToVisibility_Converter x:Key="NullObjectToVisibility_ConverterVariable"/>
+        <ValueConverters_NameSpace:IsSelectedVisibility_Converter x:Key="IsSelectedVisibility_ConverterVariable"/>
+        <ValueConverters_NameSpace:ScaleDoubleValue_Converter x:Key="ScaleDoubleValue_ConverterVariable"/>
+        <ValueConverters_NameSpace:MultiBoolean_Converter x:Key="MultiBoolean_ConverterVariable"/>
+        <ValueConverters_NameSpace:MultiBooleanVisibility_Converter x:Key="MultiBooleanVisibility_ConverterVariable"/>
+        <ValueConverters_NameSpace:MainWindowBackground_MultiValueConverter x:Key="MainWindowBackground_MultiValueConverterVariable"/>
+        <SleeveSewing_NameSpace:File_RebootWindows_Visibility_MultiValueConverter x:Key="File_RebootWindows_Visibility_MultiValueConverterVariable"/>
+        <SleeveSewing_NameSpace:File_Exit_Visibility_MultiValueConverter x:Key="File_Exit_Visibility_MultiValueConverterVariable"/>
+    </Window.Resources>
+
+    <Window.Background>
+        <MultiBinding Converter="{StaticResource MainWindowBackground_MultiValueConverterVariable}">
+            <Binding Path="CurrentUser.AccessLevel"/>
+            <Binding Path="RecipeManagerVars.RDMode"/>
+            <Binding Source="{StaticResource bgdGoreWindowBlueGradient}"/>
+            <Binding Source="{StaticResource bgdGoreWindowYellowGradient}"/>
+            <Binding Source="{StaticResource bgdGoreWindowRedGradient}"/>
+            <Binding Path="OverrideBackgroundColor_Simulation.IsSimulating"/>
+        </MultiBinding>
+    </Window.Background>
+
+    <Grid Grid.Column="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="6"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="6"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="6"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="1227*"/>
+            <ColumnDefinition Width="461*"/>
+            <ColumnDefinition Width="6"/>
+        </Grid.ColumnDefinitions>
+
+        <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" IsEnabled="{Binding Path=Status.ProcessRunning, Converter={StaticResource BoolToNotBool_ConverterVariable}}">
+            <MenuItem Tag="File" Header="File">
+                <MenuItem Header="Exit" Click="File_Exit"/>
+            </MenuItem>
+            <MenuItem Header="Security">
+                <MenuItem Header="Log In" Click="Security_LogIn"/>
+                <MenuItem Header="Log Out" Click="Security_LogOut"/>
+                <MenuItem Header="Edit Users" Click="Security_EditUser"/>
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="About" Click="Help_About"/>
+                <MenuItem Header="Simulation" Click="Simulation_Click" />
+            </MenuItem>
+        </Menu>
+
+        <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Header_NameSpace:GoreHeader_UserControl Grid.Row="0" Grid.Column="0">
+                <Header_NameSpace:GoreHeader_UserControl.IsEnabled>
+                    <MultiBinding Converter="{StaticResource MultiBoolean_ConverterVariable}" ConverterParameter="true">
+                        <Binding Path="Status.ProcessRunning" Converter="{StaticResource BoolToNotBool_ConverterVariable}"/>
+                        <Binding Path="BadgeAccessLevels_Simulation.IsSimulating" Converter="{StaticResource BoolToNotBool_ConverterVariable}"/>
+                    </MultiBinding>
+                </Header_NameSpace:GoreHeader_UserControl.IsEnabled>
+            </Header_NameSpace:GoreHeader_UserControl>
+
+            <FaultHandling_NameSpace:FaultLED_UserControl Grid.Row="0" Grid.Column="2"/>
+
+        </Grid>
+
+        <!-- Using TabControlEx to auto handle leaving controls viewable/accessible from selected tab items that are hidden.  This appears to be a bug in C#. -->
+        <Generic_NameSpace:TabControlEx x:Name="MainTabControl_TabControlEx" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2">
+
+            <TabItem Header="Main" Name="Main_TabItem">
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="{Binding CurrentUser.AccessLevel, Converter={StaticResource LoggedIn_ConverterVariable}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="2" Grid.IsSharedSizeScope="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="400"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="6"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <!--<Grid HorizontalAlignment="Left" Grid.Column="2" Width="406">
+              <RecipeManager_NameSpace:RecipeComboBox_UserControl Visibility="{Binding Path=RFID_Controller_Simulation.IsSimulating, Converter={StaticResource BoolToVisibility_ConverterVariable}}"/>
+
+              <RecipeManager_NameSpace:RecipeTextBox_UserControl Visibility="{Binding Path=RFID_Controller_Simulation.IsSimulating, Converter={StaticResource NotBoolToVisibility_ConverterVariable}}"/>
+            </Grid>-->
+
+                        <DockPanel Grid.Column="2" Width="406" HorizontalAlignment="Left">
+                            <Grid Margin="0 0 0 6" DockPanel.Dock="Top" >
+                                <Label/>
+                                <Border BorderBrush="LightGray" BorderThickness="1"/>
+                                <Rectangle Fill="{StaticResource bgdGoreLightBlue}"/>
+                                <Rectangle Fill="{Binding ProcessControl.BackgroundColor}" DockPanel.Dock="Top"/>
+                            </Grid>
+
+                            <Grid Margin="0 0 0 6" DockPanel.Dock="Top" >
+                                <TextBox IsReadOnly="True" Text="{Binding Path=ProcessControl.VerifiedStepResponse.AdvancingDefinedStep.Procedure}" HorizontalContentAlignment="Right"/>
+                                <Label Content="Procedure" Opacity=".5"/>
+                            </Grid>
+
+                            <Grid DockPanel.Dock="Top" >
+                                <TextBox IsReadOnly="True" Text="{Binding Path=ProcessControl.VerifiedStepResponse.AdvancingDefinedStep.Recipe}" HorizontalContentAlignment="Right"/>
+                                <Label Content="Recipe" Opacity=".5"/>
+                                <RecipeManager_NameSpace:RecipeComboBox_UserControl>
+                                    <RecipeManager_NameSpace:RecipeComboBox_UserControl.Style>
+                                        <Style TargetType="{x:Type RecipeManager_NameSpace:RecipeComboBox_UserControl}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding MainWindowViewModel.ShowRecipeComboBox}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </RecipeManager_NameSpace:RecipeComboBox_UserControl.Style>
+                                </RecipeManager_NameSpace:RecipeComboBox_UserControl>
+                            </Grid>
+                        </DockPanel>
+
+                        <configViews:ManualPromptView DataContext="{Binding Path=ProcessControl.CustomManualPromptViewModel}" Grid.Row="2" MinWidth="406" Height="{Binding Path=ActualHeight, ElementName=ProcessControl_UserControl}"/>
+
+                        <mams:VerifyRunView DataContext="{Binding Path=ProcessControl.VerifyRunViewModel}" Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="406" Height="150"/>
+
+                        <MainProcess_NameSpace:MainProcess_UserControl Grid.Column="2" Grid.Row="2" x:Name="ProcessControl_UserControl" Style="{StaticResource MainProcessStyle}" Margin="-206 0 0 0"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Process">
+                <ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            
+                        </Grid.ColumnDefinitions>
+
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="400"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="6"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+
+                            
+
+                            <configViews:ManualPromptView DataContext="{Binding Path=MainWindowViewModel.SubProcessManualPromptViewModel}" Grid.Row="2" Height="{Binding Path=ActualHeight, ElementName=SubProcess_SubProcess_UserControl}"/>
+
+                            <SubProcess_NameSpace:SubProcess_UserControl Grid.Row="2" Grid.Column="2" x:Name="SubProcess_SubProcess_UserControl" Margin="-206 0 0 0" VerticalAlignment="Top"
+                                                           Style="{StaticResource MainProcessStyle}"/>
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Alarms">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <FaultHandling_NameSpace:FaultList_UserControl Grid.Row="0" x:Name="FaultList_UserControl" Margin="6"/>
+
+                    <GroupBox Grid.Row="1" Height="200" Header="Machine Status" BorderThickness="0">
+                        <ListBox x:Name="MachineStatus_ListBox" ItemsSource="{Binding Messages}"/>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Errors">
+                <MessageBox_NameSpace:ExceptionViewer_UserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="12"/>
+            </TabItem>
+
+            <TabItem Header="RFID" IsSelected="{Binding Path=ProcessControl.RfidTabIsSelected, Mode=OneWayToSource}">
+                <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <rfid:Channels_UserControl PF_RFID="{Binding Path=ProcessControl.SgmsRfid}" EnableWriteField="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Line View" IsSelected="{Binding ProcessControl.LineView.LineViewIsSelected, Mode=OneWayToSource}">
+                <DockPanel Margin="6" IsEnabled="{Binding Path=Status.MachineReset}">
+                    <mamsV:LineViewV DataContext="{Binding ProcessControl.LineView}" />
+                </DockPanel>
+            </TabItem>
+
+
+            <TabItem Header="I/O" Visibility="{Binding CurrentUser.AccessLevel, Converter={StaticResource MaintenanceAccessLevel_ConverterVariable}}">
+                <Grid IsEnabled="{Binding Status.ProcessRunning, Converter={StaticResource BoolToNotBool_ConverterVariable}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                            <IO_NameSpace:IO_UserControl x:Name="DigitalInputs_UserControl" Margin="0,0,3,0"/>
+                            <IO_NameSpace:IO_UserControl x:Name="DigitalOutputs_UserControl" Margin="3,0,0,0"/>
+                        </StackPanel>
+                        <IO_NameSpace:IO_UserControl x:Name="AnaglogInputs_UserControl" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Setup" Visibility="{Binding CurrentUser.AccessLevel, Converter={StaticResource MachineOwnerAccessLevel_ConverterVariable}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid IsEnabled="{Binding Status.ProcessRunning, Converter={StaticResource BoolToNotBool_ConverterVariable}}" HorizontalAlignment="Center" VerticalAlignment="Center" Height="781">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="6"/>
+                            
+                        </Grid.ColumnDefinitions>
+
+                        <DockPanel Background="{StaticResource bgdGoreLightBlue}">
+                            <Label Content="Machine Parameters" HorizontalAlignment="Center" DockPanel.Dock="Top"/>
+                            <Grid x:Name="MachineParameters_Grid" HorizontalAlignment="Center" Margin="6 0 6 6">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <DockPanel Height="669" VerticalAlignment="Top">
+                                   
+                                    <DockPanel DockPanel.Dock="Top">
+                                        <Grid Margin="6 0 6 6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="350"/>
+                                                <ColumnDefinition Width="6"/>
+                                                <ColumnDefinition Width="350"/>
+                                                <ColumnDefinition Width="6"/>
+                                                <ColumnDefinition Width="350"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <DockPanel VerticalAlignment="Top">
+                                                <DockPanel DockPanel.Dock="Top" Margin="0 0 6 6">
+                                                    <Label Content="Machine Name:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"/>
+                                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=MachineName}" />
+                                                </DockPanel>
+
+                                                <DockPanel DockPanel.Dock="Top" Margin="0 0 6 6">
+                                                    <Label Content="RFID IP Address:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"/>
+                                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=RfidIpAddress}" />
+                                                </DockPanel>
+
+                                                <DockPanel DockPanel.Dock="Top" Margin="0 0 6 6" VerticalAlignment="Top">
+                                                    <Label Content="Max. Head Count:" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"/>
+                                                    <XceedNameSpace:IntegerUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Path=MaxHeadCount}" Minimum="1" Maximum="4"/>
+                                                </DockPanel>
+
+                                                <CheckBox Content="Reject Code Prompt" IsChecked="{Binding Path=RejectCodePrompt}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6 6 6 0"/>
+                                            </DockPanel>
+
+                                            <!--active directory view here-->
+                                            <eSig:ActiveDirectorySettingsView DataContext="{Binding Path=ActiveDirectorySettingsViewModel}" VerticalAlignment="Top" Grid.Column="2"/>
+
+                                            <DockPanel VerticalAlignment="Top" Grid.Column="4">
+                                                <DockPanel DockPanel.Dock="Top" Margin="0 0 0 6">
+                                                    <Label Content="DC Location:" Grid.Row="2" Grid.Column="0" Width="125" HorizontalAlignment="Left"/>
+                                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=DCLocation}" />
+                                                </DockPanel>
+
+                                                <DockPanel DockPanel.Dock="Top" Margin="0 0 0 6">
+                                                    <Label Content="Endpoint Name:" Grid.Row="2" Grid.Column="0" Width="125" HorizontalAlignment="Left"/>
+                                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=EndpointName}" />
+                                                </DockPanel>
+
+                                                <DockPanel DockPanel.Dock="Top" Margin="0 0 0 6">
+                                                    <Label Content="Machine Type:" Grid.Row="2" Grid.Column="0" Width="125" HorizontalAlignment="Left"/>
+                                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=MachineType}" />
+                                                </DockPanel>
+                                            </DockPanel>
+                                        </Grid>
+                                    </DockPanel>
+
+                                    <Grid Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" IsSharedSizeScope="True">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="6"/>
+                                            
+                                            
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column0Size"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column1Size"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column2Size"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column3Size"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column4Size"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column5Size"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column6Size"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Column7Size"/>
+                                            
+                                        </Grid.ColumnDefinitions>
+
+                                        
+
+                                        
+
+                                        <Label Grid.Row="2" Grid.Column="0" Content="Left Needle Home Offset:" HorizontalAlignment="Right"/>
+                                        <XceedNameSpace:DoubleUpDown Grid.Row="2" Grid.Column="1" Width="100" ShowButtonSpinner="False" FormatString="0.000" Value="{Binding Path=LeftNeedleHomeOffset}"/>
+                                        <Label Grid.Row="2" Grid.Column="2" Content="mm" HorizontalAlignment="Left"/>
+
+                                        <Label Grid.Row="4" Grid.Column="0" Content="Right Needle Home Offset:" HorizontalAlignment="Right"/>
+                                        <XceedNameSpace:DoubleUpDown Grid.Row="4" Grid.Column="1" Width="100" ShowButtonSpinner="False" FormatString="0.000" Value="{Binding Path=RightNeedleHomeOffset}"/>
+                                        <Label Grid.Row="4" Grid.Column="2" Content="mm" HorizontalAlignment="Left"/>
+
+                                        <Label Grid.Row="6" Grid.Column="0" Content="Looper Home Offset:" HorizontalAlignment="Right"/>
+                                        <XceedNameSpace:DoubleUpDown Grid.Row="6" Grid.Column="1" Width="100" ShowButtonSpinner="False" FormatString="0.000" Value="{Binding Path=LooperHomeOffset}"/>
+                                        <Label Grid.Row="6" Grid.Column="2" Content="mm" HorizontalAlignment="Left"/>
+
+                                        <Label Grid.Row="8" Grid.Column="0" Content="Traverse Home Offset:" HorizontalAlignment="Right"/>
+                                        <XceedNameSpace:DoubleUpDown Grid.Row="8" Grid.Column="1" Width="100" ShowButtonSpinner="False" FormatString="0.000" Value="{Binding Path=TraverseHomeOffset}"/>
+                                        <Label Grid.Row="8" Grid.Column="2" Content="mm" HorizontalAlignment="Left"/>
+
+                                        <Label Grid.Row="10" Grid.Column="0" Content="Reverse Looper Installed:" HorizontalAlignment="Right"/>
+                                        <CheckBox IsChecked="{Binding Path=ReverseLooperInstalled}" Grid.Row="10" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Label Grid.Row="10" Grid.Column="2" Content="" HorizontalAlignment="Left"/>
+
+                                        <Label Grid.Row="12" Grid.Column="0" Content="Payout Fiber Tension:" HorizontalAlignment="Right"/>
+                                        <XceedNameSpace:DoubleUpDown Grid.Row="12" Grid.Column="1" Width="100" ShowButtonSpinner="False" FormatString="0.000" Value="{Binding Path=PayoutFiberTension}"/>
+                                        <Label Grid.Row="12" Grid.Column="2" Content="" HorizontalAlignment="Left"/>
+
+
+
+                                    </Grid>
+                                </DockPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Top">
+
+                                    <MachineManager_NameSpace:MachineManager_UserControl MinWidth="100"/>
+
+                                </StackPanel>
+
+                            </Grid>
+                        </DockPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+
+            <TabItem Header="Recipes" Visibility="{Binding Path=CurrentUser.AccessLevel, Converter={StaticResource MachineOwnerAccessLevel_ConverterVariable}}">
+                <Grid IsEnabled="{Binding Path=Status.ProcessRunning, Converter={StaticResource BoolToNotBool_ConverterVariable}}" Margin="6">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <RecipeManager_NameSpace:RecipeManager_UserControl Grid.Row="0" Grid.Column="0" Name="RecipeManger_UserControl" Width="820"/>
+
+                    <Grid Grid.Row="0" Grid.Column="3" x:Name="Recipe_Grid" Visibility="{Binding ., Converter={StaticResource NullObjectToVisibility_ConverterVariable}}">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+
+
+                        <Grid VerticalAlignment="Top" HorizontalAlignment="Right">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Row="0" Grid.Column="0" Content="Barcode:" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding EnableBarcode}"/>
+                            <TextBox Grid.Row="0" Grid.Column="2" Width="100" ToolTip="If enabled the barcode must match the mandrel barcode to run recipe."
+                     Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}"
+                     IsEnabled="{Binding EnableBarcode, Converter={StaticResource NullableBoolToBool_ConverterVariable}}"
+                     />
+                        </Grid>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Left" IsEnabled="{Binding Path=Parent.IsTestRecipe}">
+
+                            <GroupBox Header="" VerticalAlignment="Stretch" Margin="6">
+
+                                <Grid Margin="5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="3" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="50" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Grid.Row="0" Grid.Column="0" Content="Item Number" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="ItemNumber" Text="{Binding Path=ItemNumber}" />
+
+                                    <Label Grid.Row="2" Grid.Column="0" Content="Needle Plate" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" x:Name="NeedlePlate" Text="{Binding Path=NeedlePlate}" />
+
+                                    <Label Grid.Row="4" Grid.Column="0" Content="Is Dual Line:" HorizontalAlignment="Right"/>
+                                    <CheckBox IsChecked="{Binding Path=IsDualLine}" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                    <Label Grid.Row="6" Grid.Column="0" Content="Tension" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="6" Grid.Column="1" x:Name="Tension" Text="{Binding Path=Tension}" />
+
+                                    <Label Grid.Row="2" Grid.Column="2" Content="Start Position" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="2" Grid.Column="2" x:Name="StartPosition" Text="{Binding Path=StartPosition}" />
+
+                                    <Label Grid.Row="4" Grid.Column="2" Content="Middle Gap" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="4" Grid.Column="2" x:Name="MiddleGap" Text="{Binding Path=MiddleGap}" />
+
+                                    <Label Grid.Row="6" Grid.Column="2" Content="Traverse Feedrate" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="6" Grid.Column="2" x:Name="TraverseFeedrate" Text="{Binding Path=TraverseFeedrate}" />
+
+                                    <Label Grid.Row="8" Grid.Column="2" Content="" HorizontalAlignment="Right"/>
+                                    <TextBlock Grid.Row="16" Grid.Column="0" FontWeight="Bold" Text="Left Deployment Line"  HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="16" Grid.Column="2" FontWeight="Bold" Text="Right Deployment Line"  HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+                                    <Label Grid.Row="18" Grid.Column="0" Content="Left Deployment Line Type" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="18" Grid.Column="1" Width="50" Text="{Binding Path=LeftDeploymentLineFiberType}" />
+                                    <Label Grid.Row="18" Grid.Column="2" Content="Right Deployment Line Type" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="18" Grid.Column="3" Width="50" Text="{Binding Path=RightDeploymentLineFiberType}" />
+
+                                    <Label Grid.Row="20" Grid.Column="0" Content="Left Head Deployment Line Length" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="20" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadDeploymentLineLength}" />
+                                    <Label Grid.Row="20" Grid.Column="2" Content="Left HeadDeployment Line Length" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="20" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadDeploymentLineLength}" />
+
+                                    <Label Grid.Row="22" Grid.Column="0" Content="Left Head Fiber Tension" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="22" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadFiberTension}" />
+                                    <Label Grid.Row="22" Grid.Column="2" Content="Right Head Fiber Tension" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="22" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadFiberTension}" />
+
+                                    <Label Grid.Row="24" Grid.Column="0" Content="Left Head Sewing Speed" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="24" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadSewingSpeed}" />
+                                    <Label Grid.Row="24" Grid.Column="2" Content="Right Head Sewing Speed" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="24" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadSewingSpeed}" />
+
+                                    <Label Grid.Row="26" Grid.Column="0" Content="Left Head Min Sewn Length" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="26" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadMinSewnLength}" />
+                                    <Label Grid.Row="26" Grid.Column="2" Content="Right Head Min Sewn Length" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="26" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadMinSewnLength}" />
+
+                                    <Label Grid.Row="28" Grid.Column="0" Content="Left Head Stitch Density" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="28" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadStitchDensity}" />
+                                    <Label Grid.Row="28" Grid.Column="2" Content="Right Head Stitch Density" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="28" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadStitchDensity}" />
+
+                                    <Label Grid.Row="30" Grid.Column="0" Content="Left Head Slow Stitch Time Slice" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="30" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadSlowStitchTimeSlice}" />
+                                    <Label Grid.Row="30" Grid.Column="2" Content="Right Head Slow Stitch Time Slice" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="30" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadSlowStitchTimeSlice}" />
+
+                                    <Label Grid.Row="32" Grid.Column="0" Content="Left Head Slow Stitch Count" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="32" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadSlowStitchCount}" />
+                                    <Label Grid.Row="32" Grid.Column="2" Content="Right Head Slow Stitch Count" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="32" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadSlowStitchCount}" />
+
+                                    <Label Grid.Row="34" Grid.Column="0" Content="Left Head Slow Stitch Ramp Count" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="34" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadSlowStitchRampCount}" />
+                                    <Label Grid.Row="34" Grid.Column="2" Content="Right Head Slow Stitch Ramp Count" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="34" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadSlowStitchRampCount}" />
+
+                                    <Label Grid.Row="36" Grid.Column="0" Content="Left Head Slow Stitch Tension" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="36" Grid.Column="1" Width="50" Text="{Binding Path=LeftHeadSlowStitchTension}" />
+                                    <Label Grid.Row="36" Grid.Column="2" Content="Righ Head Slow Stitch Tension" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Row="36" Grid.Column="3" Width="50" Text="{Binding Path=RightHeadSlowStitchTension}" />
+
+                                    <Label Grid.Row="38" Grid.Column="0" Content="Left Head Use Alt Tension For Slow Stitches" HorizontalAlignment="Right"/>
+                                    <CheckBox IsChecked="{Binding Path=LeftHeadUseAltTensionForSlowStitches}" Grid.Row="38" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Label Grid.Row="38" Grid.Column="2" Content="Right Head Use Alt Tension For Slow Stitches" HorizontalAlignment="Right"/>
+                                    <CheckBox IsChecked="{Binding Path=RightHeadUseAltTensionForSlowStitches}" Grid.Row="38" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                    <Label Grid.Row="40" Grid.Column="0" Content="Left Head Is Low Stitch Density" HorizontalAlignment="Right"/>
+                                    <CheckBox IsChecked="{Binding Path=LeftHeadIsLowStitchDensity}" Grid.Row="40" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Label Grid.Row="40" Grid.Column="2" Content="Right Head Is Low Stitch Density" HorizontalAlignment="Right"/>
+                                    <CheckBox IsChecked="{Binding Path=RightHeadIsLowStitchDensity}" Grid.Row="40" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+
+                                </Grid>
+
+                            </GroupBox>
+                        </StackPanel>
+                    </Grid>
+
+                </Grid>
+            </TabItem>
+
+
+        </Generic_NameSpace:TabControlEx>
+
+    </Grid>
+</Window>

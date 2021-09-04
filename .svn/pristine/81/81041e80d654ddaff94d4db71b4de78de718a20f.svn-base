@@ -1,0 +1,31 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// plc_7_ClearErrorWords.plc
+;// Created : 01/14/2013  Author: Josh Kelley
+;//
+;// Clears out All Errors pUmacError P1 along with the mSystemError Words (m7510 - m7514)
+;// This PLC is Started Through the MessageHandler.PLC Setting (mMachineControl0 = DO_ERROR_RESET)
+;// It Runs Once And Then Disables Itself
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE 
+DELETE GATHER
+OPEN PLC_7_CLEAR_ERRORS CLEAR
+
+pUmacError = 0
+
+mSysErrorWord0 = 0		;//Clear System Error word 0
+mSysErrorWord1 = 0		;//Clear System Error word 1
+mSysErrorWord2 = 0		;//Clear System Error word 2
+mSysErrorWord3 = 0		;//Clear System Error word 3
+mSysErrorWord4 = 0		;//Clear System Error word 4
+
+;//Set the done bit to HMI
+mMachineStatus0 = mMachineStatus0 | ERROR_RESET_DONE
+
+command "disable plc 7";
+
+CLOSE

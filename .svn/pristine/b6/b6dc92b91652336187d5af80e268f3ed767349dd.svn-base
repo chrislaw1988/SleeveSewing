@@ -1,0 +1,116 @@
+<ResourceDictionary 
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" >
+
+  <Style x:Key="LEDButton" TargetType="{x:Type Button}">
+    <Setter Property="SnapsToDevicePixels" Value="True"/>
+    <Setter Property="OverridesDefaultStyle" Value="True"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate  TargetType="{x:Type Button}">
+          <Grid x:Name="grid" Margin="0,0,0,0" Width="Auto" Height="Auto">
+            <Ellipse x:Name="BackgroundEllipse" Fill="{TemplateBinding Background}" Stroke="Transparent" Margin="0" Width="Auto" Height="Auto"/>
+            <Ellipse x:Name="RadialGradientEllipse" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0">
+              <Ellipse.Fill>
+                <RadialGradientBrush GradientOrigin=".50,.50">
+                  <RadialGradientBrush.RelativeTransform>
+                    <TransformGroup>
+                      <ScaleTransform CenterX="-0.0" CenterY="0.0" ScaleX="1" ScaleY="1."/>
+                      <TranslateTransform X="0.00" Y="0.0"/>
+                    </TransformGroup>
+                  </RadialGradientBrush.RelativeTransform>
+                  <GradientStop Offset="-.80" Color="#90FFFFFF"/>
+                  <GradientStop Offset="1" Color="{Binding Path=Background.Color, RelativeSource={RelativeSource TemplatedParent}}"/>
+                </RadialGradientBrush>
+              </Ellipse.Fill>
+            </Ellipse>
+            <Ellipse x:Name="ReflectionEllipse" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0">
+              <Ellipse.Fill>
+                <RadialGradientBrush GradientOrigin=".50,.25">
+                  <RadialGradientBrush.RelativeTransform>
+                    <TransformGroup>
+                      <ScaleTransform CenterX=".50" CenterY=".10" ScaleX=".75" ScaleY=".35"/>
+                      <TranslateTransform X="0.00" Y="0.0"/>
+                    </TransformGroup>
+                  </RadialGradientBrush.RelativeTransform>
+                  <GradientStop Offset="-.0" Color="#90FFFFFF"/>
+                  <GradientStop Offset="1" Color="{Binding Path=Background.Color, RelativeSource={RelativeSource TemplatedParent}}"/>
+                </RadialGradientBrush>
+              </Ellipse.Fill>
+            </Ellipse>
+            <ContentPresenter x:Name="ContentArea" VerticalAlignment="Center" HorizontalAlignment="Center" Content="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}">
+            </ContentPresenter>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="LEDButtonWithDisabled" TargetType="{x:Type Button}">
+
+    <Setter Property="SnapsToDevicePixels" Value="True"/>
+    <Setter Property="OverridesDefaultStyle" Value="True"/>
+
+    <Style.Triggers>
+      
+      <Trigger Property="IsEnabled" Value="false">
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate  TargetType="{x:Type Button}">
+              <Grid x:Name="grid" Margin="0,0,0,0" Width="Auto" Height="Auto">
+                <Ellipse x:Name="BackgroundEllipse" Fill="#FFF4F4F4" Stroke="#ADB2B5" StrokeThickness="1" Margin="0" Width="Auto" Height="Auto"/>
+                <ContentPresenter x:Name="ContentArea" VerticalAlignment="Center" HorizontalAlignment="Center" Content="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}">
+                </ContentPresenter>
+              </Grid>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+        <Setter Property="Foreground" Value="#ADADAD">
+        </Setter>
+      </Trigger>
+      
+      <Trigger Property="IsEnabled" Value="true">
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate  TargetType="{x:Type Button}">
+              <Grid x:Name="grid" Margin="0,0,0,0" Width="Auto" Height="Auto">
+                <Ellipse x:Name="BackgroundEllipse" Fill="{TemplateBinding Background}" Stroke="Transparent" Margin="0" Width="Auto" Height="Auto"/>
+                <Ellipse x:Name="RadialGradientEllipse" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0">
+                  <Ellipse.Fill>
+                    <RadialGradientBrush GradientOrigin=".50,.50">
+                      <RadialGradientBrush.RelativeTransform>
+                        <TransformGroup>
+                          <ScaleTransform CenterX="-0.0" CenterY="0.0" ScaleX="1" ScaleY="1."/>
+                          <TranslateTransform X="0.00" Y="0.0"/>
+                        </TransformGroup>
+                      </RadialGradientBrush.RelativeTransform>
+                      <GradientStop Offset="-.80" Color="#90FFFFFF"/>
+                      <GradientStop Offset="1" Color="{Binding Path=Background.Color, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </RadialGradientBrush>
+                  </Ellipse.Fill>
+                </Ellipse>
+                <Ellipse x:Name="ReflectionEllipse" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0">
+                  <Ellipse.Fill>
+                    <RadialGradientBrush GradientOrigin=".50,.25">
+                      <RadialGradientBrush.RelativeTransform>
+                        <TransformGroup>
+                          <ScaleTransform CenterX=".50" CenterY=".10" ScaleX=".75" ScaleY=".35"/>
+                          <TranslateTransform X="0.00" Y="0.0"/>
+                        </TransformGroup>
+                      </RadialGradientBrush.RelativeTransform>
+                      <GradientStop Offset="-.0" Color="#90FFFFFF"/>
+                      <GradientStop Offset="1" Color="{Binding Path=Background.Color, RelativeSource={RelativeSource TemplatedParent}}"/>
+                    </RadialGradientBrush>
+                  </Ellipse.Fill>
+                </Ellipse>
+                <ContentPresenter x:Name="ContentArea" VerticalAlignment="Center" HorizontalAlignment="Center" Content="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}"/>
+              </Grid>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Trigger>
+      
+    </Style.Triggers>
+    
+	</Style>
+</ResourceDictionary>

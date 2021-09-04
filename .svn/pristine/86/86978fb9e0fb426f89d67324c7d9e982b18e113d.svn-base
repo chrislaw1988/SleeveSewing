@@ -1,0 +1,249 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// plc_4_MessageHandler.plc
+;// Created : 01/10/2013  Author: Josh Kelley
+;//
+;//	 Marshalls Incoming Messages From the Host 
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+
+OPEN PLC_4_MSGHANDLER CLEAR
+
+
+	 ;///////////////////////////////////////////////////////////////////////////////
+     ;////		Check For The DO_HOME Command
+     ;///////////////////////////////////////////////////////////////////////////////
+	if(mMachineControl0 & DO_HOME = DO_HOME) 
+
+		;//Only run one Command
+		mMachineControl0 = mMachineControl0 & DO_HOME;
+
+		;//Clear the Status Bit
+		if(mMachineStatus0 & HOME_DONE = HOME_DONE)
+			mMachineStatus0 = mMachineStatus0 ^ HOME_DONE
+		endif
+
+		;//See if we need to Init
+		if(mAxis1AmpEnable = FALSE or mAxis2AmpEnable = FALSE or mAxis3AmpEnable = FALSE or mAxis4AmpEnable = FALSE)
+		
+			;//Clear the Status Bit
+			if(mMachineStatus0 & INIT_DONE = INIT_DONE)
+				mMachineStatus0 = mMachineStatus0 ^ INIT_DONE
+			endif
+
+			;//Start the Init PLC
+			command "Enable plc 3";
+			
+			;//Wait for the Init To Complete
+			while(mMachineStatus0 & INIT_DONE != INIT_DONE)
+			endwhile
+		
+		endif
+
+		;//Start The Homing Routine
+		command "&1 b1 r";
+		
+		mMachineControl0 = mMachineControl0 ^ DO_HOME;
+	
+	endif
+
+
+	;///////////////////////////////////////////////////////////////////////////////
+	;////		Check For the Sew Left Head Command
+	;///////////////////////////////////////////////////////////////////////////////
+	if(mMachineControl0 & DO_SEW_LEFT_HEAD = DO_SEW_LEFT_HEAD)
+
+		;//Only run one Command
+		mMachineControl0 = mMachineControl0 & DO_SEW_LEFT_HEAD;
+
+		;//Clear the Status Bit
+		if(mMachineStatus0 & SEW_LEFT_HEAD_DONE = SEW_LEFT_HEAD_DONE)
+			mMachineStatus0 = mMachineStatus0 ^ SEW_LEFT_HEAD_DONE
+		endif
+          
+		;//make sure our motors are closed loop
+		if(mAxis1AmpEnable = FALSE or mAxis2AmpEnable = FALSE or mAxis3AmpEnable = FALSE or mAxis4AmpEnable = FALSE)
+		
+			command "#1j/#2j/#3j/#4j/";
+			mCoor1Timer1 = 2000 CRD1_TMR_COUNTDOWN;
+		endif
+
+		;//Start the SewLeftHead pmc in Coord sys 1
+		command "&1 b10 r";
+
+
+		;//Clear the Control Bit
+		mMachineControl0 = mMachineControl0 ^ DO_SEW_LEFT_HEAD;
+
+	endif
+
+
+	;///////////////////////////////////////////////////////////////////////////////
+	;////		Check For the Sew Right Head Command
+	;///////////////////////////////////////////////////////////////////////////////
+	if(mMachineControl0 & DO_SEW_RIGHT_HEAD = DO_SEW_RIGHT_HEAD)
+
+		;//Only run one Command
+		mMachineControl0 = mMachineControl0 & DO_SEW_RIGHT_HEAD;
+
+		;//Clear the Status Bit
+		if(mMachineStatus0 & SEW_RIGHT_HEAD_DONE = SEW_RIGHT_HEAD_DONE)
+			mMachineStatus0 = mMachineStatus0 ^ SEW_RIGHT_HEAD_DONE
+		endif
+          
+		;//make sure our motors are closed loop
+		if(mAxis1AmpEnable = FALSE or mAxis2AmpEnable = FALSE or mAxis3AmpEnable = FALSE or mAxis4AmpEnable = FALSE)
+		
+			command "#1j/#2j/#3j/#4j/";
+			mCoor1Timer1 = 2000 CRD1_TMR_COUNTDOWN;
+
+		endif
+
+		;//Check if the Reverse Looper is Installed on this Machine 
+		if(pReverseLooperInstalled = TRUE)
+
+			;//Start The Sew Right Head with Reverse Looper in CoordSys 1
+			command "&1 b14 r";
+		else
+
+			;//Start the Sew Right Head pmc in Coordsys 1
+			command "&1 b11 r";
+		endif
+
+		;//Clear the Control Bit
+		mMachineControl0 = mMachineControl0 ^ DO_SEW_RIGHT_HEAD;
+
+	endif
+
+	;///////////////////////////////////////////////////////////////////////////////
+	;////		Check For the Return To Start Position
+	;///////////////////////////////////////////////////////////////////////////////
+	if(mMachineControl0 & DO_MOVE_TO_START = DO_MOVE_TO_START)
+
+		;//Only run one Command
+		mMachineControl0 = mMachineControl0 & DO_MOVE_TO_START;
+
+		;//Clear the Status Bit
+		if(mMachineStatus0 & MOVE_TO_START_DONE = MOVE_TO_START_DONE)
+			mMachineStatus0 = mMachineStatus0 ^ MOVE_TO_START_DONE
+		endif
+          
+		;//make sure our motors are closed loop
+		if(mAxis1AmpEnable = FALSE or mAxis2AmpEnable = FALSE or mAxis3AmpEnable = FALSE or mAxis4AmpEnable = FALSE)
+		
+			command "#1j/#2j/#3j/#4j/";
+			mCoor1Timer1 = 2000 CRD1_TMR_COUNTDOWN;
+
+		endif
+
+		;//Start Move To Start Position pmc in CoordSys 1
+		command "&1 b12 r";
+
+		;//Clear the Control Bit
+		mMachineControl0 = mMachineControl0 ^ DO_MOVE_TO_START;
+
+	endif
+
+	;///////////////////////////////////////////////////////////////////////////////
+	;////		Check For the Loop Out 360 Command
+	;///////////////////////////////////////////////////////////////////////////////
+	if(mMachineControl0 & DO_LOOP_OUT = DO_LOOP_OUT)
+
+		;//Only run one Command
+		mMachineControl0 = mMachineControl0 & DO_LOOP_OUT;
+
+		;//Clear the Status Bit
+		if(mMachineStatus0 & LOOP_OUT_DONE = LOOP_OUT_DONE)
+			mMachineStatus0 = mMachineStatus0 ^ LOOP_OUT_DONE
+		endif
+          
+		;//make sure our motors are closed loop
+		if(mAxis1AmpEnable = FALSE or mAxis2AmpEnable = FALSE or mAxis3AmpEnable = FALSE or mAxis4AmpEnable = FALSE)
+		
+			command "#1j/#2j/#3j/#4j/";
+			mCoor1Timer1 = 2000 CRD1_TMR_COUNTDOWN;
+
+		endif
+
+		;//Start Loop out 360 deg pmc in CoordSys 1
+		command "&1 b13 r";
+
+		;//Clear the Control Bit
+		mMachineControl0 = mMachineControl0 ^ DO_LOOP_OUT;
+
+	endif
+
+
+	;///////////////////////////////////////////////////////////////////////////////
+	;////		Check For the Abort Command
+	;///////////////////////////////////////////////////////////////////////////////
+	if(mMachineControl0 & D0_ABORT = D0_ABORT)
+
+		;//Only run one Command
+		mMachineControl0 = mMachineControl0 & D0_ABORT;
+
+		;//Clear the Status Bit
+		if(mMachineStatus0 & ABORT_DONE = ABORT_DONE)
+			mMachineStatus0 = mMachineStatus0 ^ ABORT_DONE
+		endif
+          
+		;//Kill any running Motion Programs
+		command ^A;
+
+		;//Kill the Motors
+		command ^K;
+		
+		;//Kill All Dac Channels
+		dac3RhtThreadBrakeTension_cnts = 0;
+		dac2LftThreadBrakeTension_cnts = 0;
+
+		;//On one of the machines 0v left ~40mv on the dac signal DT said it was in spec, I decided to drive it -1v for 0 
+		;//This signal is the presssure regulator and 40mv is enough for it to try and control pressure
+		dac1SleveTension_cnts =-81;
+		
+
+		;//Set all of the IO to the Default State
+		oLeftThreadClamp = RETRACT;
+		oRightThreadClamp = RETRACT;
+		oLeftSleeveClamp = RETRACT;
+		oRightSleeveClamp = RETRACT;
+		oSleeveTension = RETRACT;
+		oTailStockAdj = RETRACT;
+		
+		;//Clear the Control Bit
+		mMachineControl0 = mMachineControl0 ^ D0_ABORT;
+
+		;//Set the Status Bit
+		mMachineStatus0 = mMachineStatus0 | ABORT_DONE
+
+	endif
+
+
+	;///////////////////////////////////////////////////////////////////////////////
+    ;////		Check For The Error Reset Command
+    ;///////////////////////////////////////////////////////////////////////////////
+    if(mMachineControl0 & DO_ERROR_RESET = DO_ERROR_RESET)
+               
+        ;//allow only one bit to be on at a time
+        mMachineControl0 = mMachineControl0 & DO_ERROR_RESET
+               
+        ;//Turn off the bit to the HMI
+        if(mMachineStatus0 & ERROR_RESET_DONE = ERROR_RESET_DONE)
+            mMachineStatus0 = mMachineStatus0 ^ ERROR_RESET_DONE
+        endif
+               
+        ;//Enable the PLC to Run
+        command "Enable plc 7";
+               
+        ;//Clear the Control Word Bit
+        mMachineControl0 = mMachineControl0 ^ DO_ERROR_RESET
+               
+    endif
+
+	
+CLOSE

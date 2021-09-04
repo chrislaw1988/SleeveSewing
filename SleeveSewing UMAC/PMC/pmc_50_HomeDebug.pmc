@@ -1,0 +1,70 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// pmc_1_Home.pmc
+;// Created on: 01/10/2012  Author: Josh Kelley
+;// 
+;// Controls Homing of the system
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+#include "..\Headers\Download.h"
+
+OPEN PROG 50 CLEAR
+
+
+	;//Left Needle
+	iAxis1HomeVel = 1;
+	iAxis1HomeOffset = pLNeedleHomeOffset;
+	iAxis1HomeCapture = 1;	//Capture on Index Pulse High
+	iAxis1HomeFlag = 0;	//Configured to use the Home Switch
+
+	
+	;//Looper
+	iAxis2HomeVel = 1;
+	iAxis2HomeOffset = pRLooperHomeOffset;
+	iAxis2HomeCapture = 1;	//Capture on Index Pulse High
+	iAxis2HomeFlag = 0;	//Configured to use the Home Switch
+
+	;//Home the Traverse Motor
+
+	;//Home the Right Needle
+	homez14,15;
+	;//Home the Loopers
+	home2;
+	;//Home the Needle
+	home1;
+	
+	if(mAxis1HomeDone = FALSE or mAxis2HomeDone = FALSE or M1445 = FALSE or M1545 = FALSE)
+
+		
+		;//Check for the Left And Right Needle Home Failure
+		if(mAxis1HomeDone = FALSE)
+			pUmacError = AXIS1_HOME_FAILED;
+		endif
+		if(mAxis2HomeDone = FALSE)
+			pUmacError = AXIS3_HOME_FAILED;
+		endif
+
+		;//Check for the Looper Home Failure
+		if(M1445 = FALSE)
+			pUmacError = AXIS2_HOME_FAILED;
+		endif
+
+		;//Check the Traverse (pitch) Home Failure
+		if(M1545 = FALSE)
+			pUmacError = AXIS4_HOME_FAILED;
+		endif
+
+	else
+
+		mMachineStatus0 = mMachineStatus0 | HOME_DONE;
+
+	endif
+
+
+
+CLOSE

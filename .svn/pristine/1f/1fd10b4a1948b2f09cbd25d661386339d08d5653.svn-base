@@ -1,0 +1,153 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// plc_5_AxisMonitor.plc
+;// Created : 01/10/2013  Author: Josh Kelley
+;//
+;//	 Monitors Motors During Runtime For Errors
+;//		Checks for AmpFault, I2T fault, Position Limits, Fatal Following Error 
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+CLOSE
+DELETE GATHER
+OPEN PLC_5_AXIS_MONITOR CLEAR
+
+pAxisErrored = FALSE
+
+;//NOTE: P0 is for testing only.
+
+if(iSystemEstopped = TRUE)
+
+	;////////////////////////////////////////////////////////////////////////////////////////////
+	;//						Check for Amp Faults
+	;////////////////////////////////////////////////////////////////////////////////////////////
+	if(mAxis1AmpFault = TRUE or mAxis2AmpFault = TRUE or mAxis3AmpFault = TRUE or mAxis4AmpFault = TRUE) ;// orP0=1)
+	or(mAxis1I2TAmpFault  = TRUE or mAxis2I2TAmpFault  = TRUE or mAxis3I2TAmpFault = TRUE or mAxis4I2TAmpFault = TRUE)
+
+	
+		command ^K
+
+		;//Axis 1
+		if(mAxis1AmpFault = TRUE)
+
+			if(mAxis1I2TAmpFault = TRUE)
+				pUmacError = AXIS1_I2T_FAULT
+			else
+				pUmacError = AXIS1_AMP_FAULT
+			endif
+		endif
+
+		;//Axis 2
+		if(mAxis2AmpFault = TRUE)
+			if(mAxis2I2TAmpFault = TRUE)
+				pUmacError = AXIS2_I2T_FAULT;
+			else
+				pUmacError = AXIS2_AMP_FAULT
+			endif
+		endif
+
+	
+		;//Axis 3
+		if(mAxis3AmpFault = TRUE)
+			if(mAxis3I2TAmpFault = TRUE)
+				pUmacError = AXIS3_I2T_FAULT;
+			else
+				pUmacError = AXIS3_AMP_FAULT
+			endif
+		endif
+
+		;//Axis 4
+		if(mAxis4AmpFault = TRUE)
+			if(mAxis4I2TAmpFault = TRUE)
+				pUmacError = AXIS4_I2T_FAULT;
+			else
+				pUmacError = AXIS4_AMP_FAULT
+			endif
+		endif
+
+
+		pAxisErrored = TRUE	
+
+
+	endif	;//End mAxis1AmpFault = TRUE or mAxis2AmpFault = TRUE ...
+
+	;////////////////////////////////////////////////////////////////////////////////////////////
+	;//						Check For Limit Errors on Axis 4
+	;////////////////////////////////////////////////////////////////////////////////////////////
+	if(mAxis1HomeDone= TRUE and mAxis2HomeDone= TRUE and mAxis3HomeDone= TRUE and mAxis4HomeDone= TRUE)
+	AND(mMachineControl1 &DO_HOME  != DO_HOME)
+	;//AND(mCoor1Running = TRUE)
+
+		if(mAxis4NegEndLim= TRUE  or mAxis4PosEndLim= TRUE)
+
+			command ^K
+		
+
+			if(mAxis4NegEndLim= TRUE)
+				pUmacError = AXIS4_NEG_LIMIT
+			endif
+
+			if(mAxis4PosEndLim= TRUE)
+				pUmacError = AXIS4_POS_LIMIT
+			endif
+
+			pAxisErrored = TRUE	
+
+
+		endif	;//End mAxis1AmpFault = TRUE or mAxis2AmpFault = TRUE ...
+
+
+	endif
+
+
+	;////////////////////////////////////////////////////////////////////////////////////////////
+	;//						Check for Fatal Following Errors
+	;////////////////////////////////////////////////////////////////////////////////////////////
+	if(pAxisErrored = FALSE )
+		if(mAxis1FatFolBit= TRUE or mAxis2FatFolBit= TRUE or mAxis3FatFolBit= TRUE or mAxis4FatFolBit= TRUE)
+
+			;//Make sure the Motors are Called
+			command ^K
+		
+
+			if(mAxis1FatFolBit = TRUE)
+				pUmacError = AXIS1_FF_FAULT
+				mAxis1FatFolBit = FALSE
+			endif
+
+			if(mAxis2FatFolBit = TRUE)
+				pUmacError = AXIS2_FF_FAULT
+				mAxis2FatFolBit = FALSE
+			endif
+
+			if(mAxis3FatFolBit = TRUE)
+				pUmacError = AXIS3_FF_FAULT
+				mAxis3FatFolBit = FALSE
+			endif
+
+			if(mAxis4FatFolBit = TRUE)
+				pUmacError = AXIS4_FF_FAULT
+				mAxis4FatFolBit = FALSE
+			endif
+
+			pAxisErrored = TRUE	
+
+		endif	;//End mAxis1AmpFault = TRUE or mAxis2AmpFault = TRUE ...
+	endif
+
+	if(pAxisErrored = TRUE)
+
+		;//Make sure that the home bit is off
+		if(mMachineControl0 & DO_HOME = DO_HOME)
+		
+			mMachineControl0 = mMachineControl0 ^ DO_HOME
+
+		endif	;//End mMachineControl1 & DO_START = DO_HOME
+		
+		;//Enable the IO Init PLC
+		enable plc 8;
+
+	endif	;;//End pAxisErrored = TRUE
+endif ;;//If not in ESTOP Condition
+CLOSE

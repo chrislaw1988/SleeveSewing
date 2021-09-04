@@ -1,0 +1,181 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.ComponentModel;
+using System.Xml.Serialization;
+
+namespace SleeveSewing
+{
+    public class Sleeve : INotifyPropertyChanged
+    {
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Instance Members 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Instance Members
+
+        private string _itemNumber = string.Empty;
+        private string _needlePlate = string.Empty;
+        private bool _isDualLine = false;
+        private string _numberOfKnots = string.Empty;
+
+        private double _tension_cnts = 0.0;
+        private double _startPosition_cm = 0.0;
+        private double _middleGap_mm = 0.0;
+        private double _xAxisTraverseFeedrate_mm_sec = 0.0;
+        
+        #endregion ~Instance Members
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Construction 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Construction
+
+        public Sleeve()
+        {
+
+        }
+
+        #endregion ~Construction
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          Properties 
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region Properties
+
+        public string ItemNumber
+        {
+            get { return _itemNumber; }
+            set
+            {
+                if (_itemNumber != value)
+                {
+                    _itemNumber = value;
+                    NotifyPropertyChanged("ItemNumber");
+                }
+            }
+        }
+
+        public string NeedlePlate
+        {
+            get { return _needlePlate; }
+            set
+            {
+                if (_needlePlate != value)
+                {
+                    _needlePlate = value;
+                    NotifyPropertyChanged("NeedlePlate");
+                }
+            }
+        }
+
+        public bool IsDualLine
+        {
+            get { return _isDualLine; }
+            set
+            {
+                if (_isDualLine != value)
+                {
+
+                    _isDualLine = value;
+                    NotifyPropertyChanged("IsDualLine");
+                }
+            }
+        }
+
+
+        public string NumberOfKnots
+        {
+            get { return _numberOfKnots; }
+            set
+            {
+                if (_numberOfKnots != value)
+                {
+                    _numberOfKnots = value;
+                    NotifyPropertyChanged("NumberOfKnots");
+                }
+            }
+        }
+
+
+        public double Tension
+        {
+            get { return _tension_cnts; }
+            set
+            {
+                if (_tension_cnts != value)
+                {
+                    _tension_cnts = value;
+                    NotifyPropertyChanged("Tension");
+                }
+            }
+        }
+
+        public double StartPosition
+        {
+            get { return _startPosition_cm; }
+            set
+            {
+                if (_startPosition_cm != value)
+                {
+                    _startPosition_cm = value;
+                    NotifyPropertyChanged("StartPosition");
+                }
+            }
+        }
+
+        public double MiddleGap
+        {
+            get { return _middleGap_mm; }
+            set
+            {
+                if (_middleGap_mm != value)
+                {
+                    _middleGap_mm = value;
+                    NotifyPropertyChanged("MiddleGap");
+                }
+            }
+        }
+
+        public double TraverseFeedrate
+        {
+            get { return _xAxisTraverseFeedrate_mm_sec; }
+            set
+            {
+                if (_xAxisTraverseFeedrate_mm_sec != value)
+                {
+                    _xAxisTraverseFeedrate_mm_sec = value;
+                    NotifyPropertyChanged("TraverseFeedrate");
+                }
+            }
+        }
+
+        #endregion ~Properties
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //          INotifyPropertyChanged Interface Support
+        //////////////////////////////////////////////////////////////////////////////////////////
+        #region INotifyPropertyChanged
+
+        //Property Changed Event
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// <para>Raises the Property Changed Event Passing the source property that is updating</para>
+        /// </summary>
+        /// <param name="propertyName"></param>
+        public void NotifyPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion ~INotifyPropertyChanged
+
+
+    }
+}

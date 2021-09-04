@@ -1,0 +1,44 @@
+﻿
+;////////////////////////////////////////////////////////////////////////////////////////////
+;//
+;// pmc_13_LoopOut360Deg.pmc
+;// Created on: 06/03/2013  Author: Josh Kelley
+;// 
+;// Move the Looper Motor 360 degrees "Loop Out" of the Last Stitch
+;//
+;//	We have to leave the Looper Engaged within the last stitch, This Enables the Operator
+;// To Pay out the deployment line without deploying stitches. 
+;//
+;////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE
+DELETE GATHER
+;#include "..\Headers\Download.h"
+
+OPEN PROG_13_LOOP_OUT_360 CLEAR
+
+	;//Loop out 360 deg with the Looper motor 
+	;//we leave the looper engaged for the last stitch for deploying the deployment line.
+	LINEAR;
+	INC;
+	PVT(250)
+	if(pReverseLooperInstalled = TRUE)
+		C -360.0 :3.723;
+		dwell(1);
+	else
+		C 360.0 :3.723;
+		dwell(1);
+	endif
+	
+
+	
+
+	
+
+	;//Set the Done Bit 
+	mMachineStatus0 = mMachineStatus0 | LOOP_OUT_DONE;
+
+	
+
+CLOSE;
